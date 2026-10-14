@@ -2,6 +2,8 @@
 
 > Bu dosya projenin tek plan kaynağıdır. Claude Code oturumları buradan devam eder: önce bu dosyayı oku, "Şimdi" bölümündeki ilk açık maddeyi al, bitince işaretle ve "Karar günlüğü"ne yaz.
 > Son güncelleme: 14 Ekim 2026
+>
+> Bu dosya herkese açık: ürün ve teknik plan. Gelir, hedef kitle, ad ve alan adı, başarı hedefleri ve Eren'in kendi defterine ait işler özel `erenbekman/defter` deposundaki `PLAN-OZEL.md`'de.
 
 ## 1. Ne yapıyoruz?
 
@@ -15,12 +17,9 @@
 
 Okuma dış sitelerde değil, defterde yapılır.
 
-**Kimin için:** Önce Türkçe konuşan geliştiriciler ve öğrenenler (ilk kullanıcı: Eren). Sonra başka diller ve konular; motor konudan bağımsızdır.
+**Kimin için:** Önce Türkçe konuşan öğrenenler. Sonra başka diller ve konular; motor konudan bağımsızdır.
 
-**Başarı ölçüsü (ilk 3 ay):**
-1. Eren Medium'a ve dev.to'ya bakmadan haftalık okumasını defterden yapıyor.
-2. En az 5 kişi kendi defterini kurmuş ve en az 20 ekleme yapmış.
-3. Skill "deftere ekle" isteklerinin en az %90'ında yeri doğru seçiyor (bkz. Faz 2 eval).
+**Ürün ölçüsü:** skill "deftere ekle" isteklerinin en az %90'ında yeri doğru seçiyor (bkz. Faz 2 eval).
 
 ## 2. Bugün ne var? (v0.1)
 
@@ -36,7 +35,7 @@ Okuma dış sitelerde değil, defterde yapılır.
 İki depo var:
 
 - **`erenbekman/defter-kit` (herkese açık):** motor, skill, kurulum ve örnek defter.
-- **`erenbekman/defter` (özel):** Eren'in defteri: 24 bölüm, 152 konu, 351 bekleyen okuma.
+- **`erenbekman/defter` (özel):** Eren'in kişisel defteri; motorun ilk kullanıcısı.
   - Motor şu an orada geliştiriliyor ve `scripts/kit-esitle.mjs` ile kite kopyalanıyor.
   - Bu geçici bir düzen (K1).
 
@@ -89,7 +88,7 @@ Her açık kararın bir önerisi var. Onaylananlar "Karar günlüğü"ne taşın
 | Seçenek | Not |
 |---|---|
 | **Kullanıcının GitHub'ı + kendi artifact'ı (bugün)** | Sunucu yok, maliyet yok, veri kullanıcıda. GitHub gerektirir. |
-| Barındırılan servis (def-ter.com) | Kolay başlangıç, ama hesap, depolama ve güvenlik yükü getirir. |
+| Barındırılan servis | Kolay başlangıç, ama hesap, depolama ve güvenlik yükü getirir. |
 
 **Öneri:** sunucusuz kal; servis ancak talep görülürse açılır. GitHub hesabı olmayanlar için bir ara yol düşünülebilir: sadece artifact'ta yaşayan defter. İçerik artifact veritabanında durur, sonra GitHub'a taşınabilir. Bu Faz 4'e konacak bir fikir.
 
@@ -99,7 +98,7 @@ Her açık kararın bir önerisi var. Onaylananlar "Karar günlüğü"ne taşın
 
 ### K6. Ad ve alan adı
 
-Ürün adı "Defter". def-ter.com boşta ama henüz alınmadı. Karar Faz 3'e, yani tanıtım sayfasına kadar bekleyebilir.
+Ürün adı şimdilik "Defter". Alan adı kararı özel planda; Faz 3'teki tanıtım sayfasına kadar bekleyebilir.
 
 ## 4. Yol haritası
 
@@ -113,7 +112,6 @@ Her faz bir **kabul ölçütüyle** biter; ölçüt sağlanmadan sonraki faza ge
   - içerik kuralları `kit/CLAUDE.md` şablonunda kalır.
 - [ ] **CI:** GitHub Actions, her push ve PR'da `npm ci && npm run build && npm run check`. Ayrıca `scripts/yeni-defter.mjs` ile geçici bir defter kurup onu da derlesin.
 - [ ] **Gizli bilgi taraması:** `check.mjs` içerikte anahtar, token ve özel anahtar kalıplarını arasın ve bulursa derlemeyi durdursun. Kalıp örnekleri: `sk-`, `ghp_`, `AKIA`, `-----BEGIN`, `xox[bp]-`. Defterler herkese açık depolarda yaşayacağı için bu zorunlu.
-- [ ] **Eren'in skill'i:** motor adresini güncelle.
 
 **Kabul ölçütü:** CI yeşil; temiz klondan `yeni-defter` → build → check hatasız; gizli bilgi taraması bir test anahtarını yakalıyor.
 
@@ -166,8 +164,8 @@ Her faz bir **kabul ölçütüyle** biter; ölçüt sağlanmadan sonraki faza ge
 - [ ] **Kurulum:** K3'e göre eklenti pazarı ve claude.ai skill kurulum adımları.
 - [ ] **"Yeni defter kur" uçtan uca:** kullanıcının boş GitHub deposu → kurulum → ilk commit → artifact yayını (`db` ve `user` yetenekleriyle) → adresin `defter.config.json`'a yazılması.
 - [ ] **Örnek defter:** kitteki boş örnek yerine 2–3 bölümlük gerçek bir vitrin.
-- [ ] **Tanıtım sayfası:** README'nin kısa hâli, ekran görüntüleri ve 1 dakikalık bir kayıt. K6'ya göre def-ter.com'da.
-- [ ] **İlk kullanıcılar:** 5 kişiyle dene, kurulumda takıldıkları yeri not et.
+- [ ] **Tanıtım sayfası:** README'nin kısa hâli, ekran görüntüleri ve 1 dakikalık bir kayıt. Adresi K6'ya göre.
+- [ ] **İlk kullanıcılar:** birkaç kişiyle dene, kurulumda takıldıkları yeri not et ve issue aç.
 
 **Kabul ölçütü:** Daha önce görmemiş biri 10 dakikadan kısa sürede defterini kurup ilk eklemesini yapabiliyor.
 
@@ -223,15 +221,13 @@ Her faz bir **kabul ölçütüyle** biter; ölçüt sağlanmadan sonraki faza ge
 1. [ ] K1–K4 kararlarını konuş ve günlüğe yaz.
 2. [ ] Faz 0'ın tamamı.
 3. [ ] Faz 1 için npm paket adını kontrol et ve CLI iskeletini kur.
-4. [ ] Eren'in kendi okuma kuyruğundan bir partiyi skill'le işle. Bu, ürünün gerçek kullanımla denenmesi olur; takılınan her yer bir issue olur.
+4. [ ] Skill'i gerçek bir okuma kuyruğu partisiyle dene; takılınan her yer bir issue olur.
 
 ## 8. Konuşmamız gereken sorular
 
 1. **K1:** Motoru npm paketine çevirmeyi onaylıyor musun? Eren'in defteri de pakete geçecek.
 2. **K2:** MIT uygun mu?
 3. **K4:** GitHub'ı olmayan kullanıcıyı ilk sürümde hedefliyor muyuz, yoksa "GitHub şart" mı?
-4. **Hedef kitle:** Faz 3'teki ilk 5 kullanıcı kim olacak? Geliştirici arkadaşlar mı, farklı alanlardan öğrenenler mi? Bu, örnek defterin konusunu belirler.
-5. **Gelir:** ücretsiz açık kaynak mı kalacak, yoksa ileride barındırılan sürüm mü düşünülüyor? Şimdilik karar gerekmez, ama K4'ü etkiler.
 
 ## Karar günlüğü
 
