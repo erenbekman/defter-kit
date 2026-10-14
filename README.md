@@ -17,10 +17,18 @@ Bu depo aynı zamanda derlenebilen bir örnek defterdir: `npm install && npm run
 
 ## Kurmak
 
-**1. Eklentiyi kur (bir kez).**
+**1. Skill'i kur (bir kez).**
+
+```bash
+npx skills add erenbekman/defter-kit -g
+```
+
+Claude Code, Cursor, Codex, OpenCode ve diğer kodlama ajanlarına kurar (`-g`: bütün projelerde; Claude Code için `~/.claude/skills/defter`). Güncellemek için `npx skills update defter`. ([skills.sh](https://skills.sh))
+
+Diğer yollar:
 
 - **claude.ai, masaüstü ve mobil:** Customize → Plugins → pazar ekle: `erenbekman/defter-kit` → `defter`'i kur. Hesabına bağlanır, Claude Code'a da kendiliğinden gelir.
-- **Sadece Claude Code:**
+- **Claude Code eklentisi olarak:**
   ```bash
   claude plugin marketplace add erenbekman/defter-kit
   claude plugin install defter@defter-kit

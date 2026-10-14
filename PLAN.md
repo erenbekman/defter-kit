@@ -83,7 +83,7 @@ Her açık kararın bir önerisi var. Onaylananlar "Karar günlüğü"ne taşın
    - Bulamazsa kullanıcıya sorar ve cevabı hafızaya ya da proje dosyasına yazmayı önerir.
    - Böylece herkes aynı skill'i kurar ve güncelleme tek yerden gelir.
 
-**Karar:** tek eklenti, tek SKILL.md (`plugin/skills/defter/SKILL.md`). claude.ai'de Customize → Plugins'ten eklenen pazar hesaba bağlanır ve Claude Code'a kendiliğinden gelir; skill sohbette, Cowork'te ve Claude Code'da yüklenir (claude.com/docs/plugins/platform-support, Ekim 2026). Kişisel adres skill'de yok; defter sırayla bulunur: çalışma klasörü → mesaj → hafızadaki `defterim:` satırı → `<github-adı>/defter`. Eklentinin `userConfig` özelliği kullanılmadı: claude.ai sohbetinde değer sormuyor.
+**Karar:** tek eklenti, tek SKILL.md (`plugin/skills/defter/SKILL.md`). claude.ai'de Customize → Plugins'ten eklenen pazar hesaba bağlanır ve Claude Code'a kendiliğinden gelir; skill sohbette, Cowork'te ve Claude Code'da yüklenir (claude.com/docs/plugins/platform-support, Ekim 2026). Kişisel adres skill'de yok; defter sırayla bulunur: çalışma klasörü → mesaj → hafızadaki `defterim:` satırı → `<github-adı>/defter`. Eklentinin `userConfig` özelliği kullanılmadı: claude.ai sohbetinde değer sormuyor. Aynı SKILL.md `npx skills add erenbekman/defter-kit -g` ile de kuruluyor (skills.sh CLI; Claude Code, Cursor, Codex ve diğer ajanlar); 14 Ekim 2026'da denendi, `~/.claude/skills/defter`'e kuruldu.
 
 ### K4. Defterler nerede yaşar? *(açık)*
 
