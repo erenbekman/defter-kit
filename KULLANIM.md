@@ -119,6 +119,10 @@ Her şeyi aynı anda yapmak yerine iki kullanıcı tipiyle başla, gerisini bunl
 
 ## 8. Konuşulacaklar
 
+**Karar verilenler (14 Ekim 2026):** ilk kitle P1 + P2; GitHub Issue kutusu ikinci kuyruk olarak açılır; herkese açık defterler ürünün parçası; skill global bir eklenti olarak dağıtılır (PLAN K3).
+
+Açık kalanlar:
+
 1. **İlk iki kullanıcı tipi:** P1 + P2 önerisine katılıyor musun, yoksa P3 (öğrenci) gibi daha geniş bir kitle mi?
 2. **Giriş kanalı:** GitHub Issue kutusunu ikinci kuyruk olarak açmak mantıklı mı, yoksa tek kuyruk (artifact) mı kalsın?
 3. **Aralıklı tekrar:** ilerleme şu an sadece tarayıcıda. Tekrar kartları cihazlar arası senkron gerektirir (artifact veritabanı). Bu, K4 kararını da etkiler.

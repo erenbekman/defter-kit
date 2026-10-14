@@ -1,0 +1,12 @@
+{
+  "name": "defter-kit",
+  "description": "Defter: kendi öğrenme defterini kur ve her sohbetten büyüt.",
+  "owner": { "name": "Eren Bekman", "url": "https://github.com/erenbekman" },
+  "plugins": [
+    {
+      "name": "defter",
+      "source": "./plugin",
+      "description": "Her sohbetten deftere ekle: doğrular, tekrarı ayıklar, kaynağıyla doğru bölüme yazar."
+    }
+  ]
+}

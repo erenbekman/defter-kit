@@ -9,7 +9,7 @@ Kendi öğrenme defterini kur. Okuduğun yazıyı, izlediğin videoyu ya da Clau
 | Parça | Ne yapar |
 |---|---|
 | **Motor** (`src/`) | Markdown'ı çok sayfalı bir siteye ve tek dosyalık bir Claude artifact'ına derler: arama, "öğrendim" işaretleri, açık/koyu tema, okuma kuyruğu. Tek bağımlılık: `marked`. |
-| **`defter` skill'i** (`skill/defter/SKILL.md`) | Herhangi bir Claude sohbetinden deftere ekler; ilgili konuyu bulur, yoksa konu, sayfa ya da kategori açar. |
+| **`defter` eklentisi** (`plugin/`) | Herkes için aynı skill. Defterini kendisi bulur; herhangi bir Claude sohbetinden ekler, ilgili konuyu bulur, yoksa konu, sayfa ya da kategori açar. Kişisel adres içermez. |
 | **Kurulum** (`scripts/yeni-defter.mjs`) | Adın, konun ve kategorilerinle boş bir defter kurar. |
 | **Kural dosyası** (`CLAUDE.md`) | Defterin üslubu ve blok sözlüğü. Senin defterin, senin kuralların: değiştirebilirsin. |
 
@@ -17,7 +17,20 @@ Bu depo aynı zamanda derlenebilen bir örnek defterdir: `npm install && npm run
 
 ## Kurmak
 
-**Claude ile (önerilen).** `skill/defter/SKILL.md` dosyasını Claude'a skill olarak ekle, sonra bir sohbette "yeni defter kur" de. Adını, konunu ve başlangıç kategorilerini sorar; GitHub'da açtığın boş depoya kurar ve defteri bir artifact olarak yayınlar.
+**1. Eklentiyi kur (bir kez).**
+
+- **claude.ai, masaüstü ve mobil:** Customize → Plugins → pazar ekle: `erenbekman/defter-kit` → `defter`'i kur. Hesabına bağlanır, Claude Code'a da kendiliğinden gelir.
+- **Sadece Claude Code:**
+  ```bash
+  claude plugin marketplace add erenbekman/defter-kit
+  claude plugin install defter@defter-kit
+  ```
+
+**2. Defterini kur.** Herhangi bir sohbette "yeni defter kur" de. Adını, konunu ve başlangıç kategorilerini sorar; GitHub'da açtığın boş depoya (varsayılan adı `defter`) kurar, artifact olarak yayınlar ve ilk eklemeyi seninle yapar.
+
+**3. Kullan.** Bundan sonra her sohbette "deftere ekle". Skill defterini kendisi bulur: çalışma klasörü → mesajın → hafızandaki `defterim: sahip/depo` satırı → `<github-adın>/defter`.
+
+**Kendi defterin, kendi kuralların.** Üslup, okur ve kurallar defterinin `CLAUDE.md`'sinde; ad ve görünüm `defter.config.json`'da. İstediğin gibi değiştir ya da "defterimi özelleştir: …" de. Eklenti ve motor güncellemeleri bu dosyalara dokunmaz; motoru güncellemek için "motoru güncelle" de.
 
 **Elle.**
 
@@ -29,7 +42,7 @@ node scripts/yeni-defter.mjs ../benim-defterim --sahip "Ayşe Yılmaz" --konu "�
 cd ../benim-defterim && npm install && npm run dev
 ```
 
-Yeni defterin içinde adresleri doldurulmuş kendi `skill/defter/SKILL.md`'si de olur; onu Claude'a eklersin.
+Eklentiyi kurduktan sonra skill bu defteri `<github-adın>/defter` adından ya da çalışma klasöründen bulur.
 
 ## Kullanmak
 
@@ -42,8 +55,11 @@ Yeni defterin içinde adresleri doldurulmuş kendi `skill/defter/SKILL.md`'si de
 | "bu sohbetten öğrendiklerimi ekle" | Sohbetteki kalıcı bilgi süzülür |
 | "defterde X ne diyor?" | Defterden cevaplar, bağlantı verir |
 | "kuyruğu işle" | Okuma kuyruğundaki linkler ve notlar sırayla işlenir |
+| "defterimi özelleştir: …" | Üslup, kategori ya da görünüm değişikliği senin dosyalarına yazılır |
+| "motoru güncelle" | Sadece motor yenilenir; içeriğine ve kurallarına dokunulmaz |
+| "defterimi yayınla" | Herkese açık site (Vercel) |
 
-Sohbet depoya yazamıyorsa skill kaydı defterin okuma kuyruğuna bırakır; kuyruğa artifact'taki formdan link ya da not da eklenebilir.
+Sohbet depoya yazamıyorsa skill kaydı kuyruğa bırakır: defter deposunda `kuyruk` etiketli bir issue ya da artifact'taki okuma kuyruğu. Telefondan ya da tarayıcıdan da issue açarak kuyruğa ekleyebilirsin.
 
 ## Bir konu nasıl görünür?
 

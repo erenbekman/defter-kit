@@ -30,7 +30,7 @@ Kimlerin ne için kullanacağı, deftere bilgi girme yolları, okuma ve tekrar b
 | Motor | `src/`: `build.mjs`, `app.js`, `style.css`, `check.mjs`, `serve.mjs`, `enhance.js` | Çalışıyor. Markdown'ı çok sayfalı site (`dist/`) ve tek dosya artifact'a (`dist/defter.html`) derliyor. Arama, ilerleme, tema, okuma kuyruğu var. Tek bağımlılık: `marked`. |
 | Ayar | `defter.config.json` | Ad, sahip, imza, ana sayfa metinleri, repo, artifact. |
 | Kural dosyası | Her defterin `CLAUDE.md`'si (şablon: `kit/CLAUDE.md`) | Üslup, blok sözlüğü, ekleme modları, kuyruk şeması. |
-| Skill | `skill/defter/SKILL.md` | v0.1. Desteklenen istekler: ekle (direkt / standart / detaylı), yer seçme, sohbetten süzme, ara, düzelt, taşı, kuyruğu işle, yeni defter kur. Depoya yazamazsa kuyruğa bırakır. |
+| Skill | `plugin/skills/defter/SKILL.md` (Claude eklentisi, pazar: `.claude-plugin/marketplace.json`) | v0.2. Global: defteri kendisi bulur. Ekle (direkt / standart / detaylı), yer seçme, sohbetten süzme, ara, düzelt, taşı, kuyruğu işle (issue + artifact), özelleştir, motoru güncelle, yayınla, yeni defter kur. |
 | Kurulum | `scripts/yeni-defter.mjs` + `kit/` | Boş defter kuruyor; Türkçe iyelik ekini kendisi yapıyor. |
 | Kuyruk | Artifact veritabanı, `kuyruk` koleksiyonu | Link ya da linksiz not; `mod` ve `hedef` alanları. |
 
@@ -64,7 +64,7 @@ Her açık kararın bir önerisi var. Onaylananlar "Karar günlüğü"ne taşın
 - Lisans olmadan kod herkese açık görünür ama başkaları yasal olarak kullanamaz.
 - Defter içerikleri her kullanıcının kendisine aittir; motor lisansı içeriği kapsamaz. Bunu README'ye yaz.
 
-### K3. Skill nasıl dağıtılır? *(açık)*
+### K3. Skill nasıl dağıtılır? *(karar verildi: 14 Ekim 2026)*
 
 1. **Claude Code eklentisi.**
    - Kit deposu aynı zamanda eklenti pazarı olur:
@@ -83,7 +83,7 @@ Her açık kararın bir önerisi var. Onaylananlar "Karar günlüğü"ne taşın
    - Bulamazsa kullanıcıya sorar ve cevabı hafızaya ya da proje dosyasına yazmayı önerir.
    - Böylece herkes aynı skill'i kurar ve güncelleme tek yerden gelir.
 
-**Öneri: 1 ve 2 birlikte, tek SKILL.md kaynağıyla. Madde 3 zorunlu.**
+**Karar:** tek eklenti, tek SKILL.md (`plugin/skills/defter/SKILL.md`). claude.ai'de Customize → Plugins'ten eklenen pazar hesaba bağlanır ve Claude Code'a kendiliğinden gelir; skill sohbette, Cowork'te ve Claude Code'da yüklenir (claude.com/docs/plugins/platform-support, Ekim 2026). Kişisel adres skill'de yok; defter sırayla bulunur: çalışma klasörü → mesaj → hafızadaki `defterim:` satırı → `<github-adı>/defter`. Eklentinin `userConfig` özelliği kullanılmadı: claude.ai sohbetinde değer sormuyor.
 
 ### K4. Defterler nerede yaşar? *(açık)*
 
@@ -229,7 +229,7 @@ Her faz bir **kabul ölçütüyle** biter; ölçüt sağlanmadan sonraki faza ge
 
 1. **K1:** Motoru npm paketine çevirmeyi onaylıyor musun? Eren'in defteri de pakete geçecek.
 2. **K2:** MIT uygun mu?
-3. **K4:** GitHub'ı olmayan kullanıcıyı ilk sürümde hedefliyor muyuz, yoksa "GitHub şart" mı?
+3. **K4:** GitHub'ı olmayan kullanıcıyı ilk sürümde hedefliyor muyuz, yoksa "GitHub şart" mı? (İlk kitle P1+P2 olduğu için öneri: ilk sürümde GitHub şart.)
 
 ## Karar günlüğü
 
@@ -240,6 +240,10 @@ Her faz bir **kabul ölçütüyle** biter; ölçüt sağlanmadan sonraki faza ge
 | 2026-10-14 | Ekleme modları: `direkt`, `standart` (varsayılan), `detayli` | Kullanıcı araştırma derinliğini seçebilsin |
 | 2026-10-14 | Depoya yazamayan sohbet, kaydı artifact kuyruğuna bırakır | Her sohbetten ekleme yapılabilsin |
 | 2026-10-14 | `:::okuma` bloğu eklendi (`:::medium` ile aynı) | Kaynak sadece Medium değil |
+| 2026-10-14 | İlk kitle: kişisel geliştirici (P1) ve yazılım ekibi (P2) | Ürün zaten bunun için var; Claude Code dağıtım kanalı hazır |
+| 2026-10-14 | GitHub Issue kutusu ikinci kuyruk olarak açılır | Telefon, tarayıcı ve depoya yazamayan sohbet tek mekanizmaya yazsın |
+| 2026-10-14 | Herkese açık defterler ürünün parçası (site olarak yayın) | Öğretmen ve içerik üretici kullanımı; paylaşılabilir bilgi |
+| 2026-10-14 | Global eklenti: herkes aynı skill'i kurar; kurallar ve görünüm kullanıcının deposunda, motor kit'ten güncellenir (K3) | Herkeste aynı mantık, herkesin kendi defteri, isteyen özelleştirir |
 
 ## Fikir kutusu
 

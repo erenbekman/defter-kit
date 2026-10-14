@@ -1,0 +1,9 @@
+{
+  "name": "defter",
+  "description": "Kişisel öğrenme defteri: her sohbetten \"deftere ekle\" de; bilgi doğrulanır, tekrar ayıklanır, kaynağıyla doğru bölüme yazılır. Defteri kurar, özelleştirir ve yayınlar.",
+  "version": "0.2.0",
+  "author": { "name": "Eren Bekman", "url": "https://github.com/erenbekman" },
+  "homepage": "https://github.com/erenbekman/defter-kit",
+  "repository": "https://github.com/erenbekman/defter-kit",
+  "keywords": ["notes", "learning", "knowledge-base", "markdown", "turkish"]
+}

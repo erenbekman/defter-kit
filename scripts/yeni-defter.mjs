@@ -10,7 +10,6 @@ import path from 'node:path';
 import { parseArgs } from 'node:util';
 import { fileURLToPath } from 'node:url';
 
-const MOTOR = 'erenbekman/defter-kit';   // motorun güncel hâli burada
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const { values: o, positionals } = parseArgs({
   allowPositionals: true,
@@ -63,9 +62,6 @@ const kopyala = p => yaz(p, fs.readFileSync(path.join(ROOT, p)));
 
 for (const f of fs.readdirSync(path.join(ROOT, 'src'))) kopyala(path.join('src', f));
 for (const f of ['.gitignore', 'vercel.json', 'scripts/yeni-defter.mjs', 'kit/CLAUDE.md', 'kit/hos-geldin.md']) kopyala(f);
-// skill: "Defterim" bölümü bu defterin adresleriyle dolu gelir
-const skill = fs.readFileSync(path.join(ROOT, 'skill/defter/SKILL.md'), 'utf8');
-yaz('skill/defter/SKILL.md', skill.replaceAll('{{REPO}}', o.repo || '(henüz yok)').replaceAll('{{ARTIFACT}}', o.artifact || '(henüz yayınlanmadı)').replaceAll('{{MOTOR}}', MOTOR));
 const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
 yaz('package.json', JSON.stringify({ ...pkg, name: slug(`${o.ad}-${o.sahip}`), description: `${imza}: ${o.konu}.`, author: o.sahip }, null, 2) + '\n');
 yaz('defter.config.json', JSON.stringify({
@@ -85,7 +81,7 @@ yaz('data/queue.json', '{\n"lists": {},\n"items": [\n]\n}\n');
 yaz('CLAUDE.md', doldur(fs.readFileSync(path.join(ROOT, 'kit/CLAUDE.md'), 'utf8')));
 yaz(`content/${kategoriler[0].id}/hos-geldin.md`, doldur(fs.readFileSync(path.join(ROOT, 'kit/hos-geldin.md'), 'utf8')));
 for (const k of kategoriler.slice(1)) fs.mkdirSync(path.join(OUT, 'content', k.id), { recursive: true });
-yaz('README.md', `# ${o.ad} · ${o.sahip}\n\n${imza}: ${o.konu}. [defter-kit](https://github.com/erenbekman/defter-kit) ile kuruldu.\n\n\`\`\`bash\nnpm install\nnpm run dev      # http://localhost:4321\n\`\`\`\n\nİçerik eklemek için Claude'da \`defter\` skill'ini kullan ya da kuralları için [CLAUDE.md](CLAUDE.md)'ye bak.\n`);
+yaz('README.md', `# ${o.ad} · ${o.sahip}\n\n${imza}: ${o.konu}. [defter-kit](https://github.com/erenbekman/defter-kit) ile kuruldu.\n\n\`\`\`bash\nnpm install\nnpm run dev      # http://localhost:4321\n\`\`\`\n\nİçerik eklemek için Claude'da \`defter\` eklentisini kur (bkz. [defter-kit](https://github.com/erenbekman/defter-kit)) ve herhangi bir sohbette \"deftere ekle\" de. Üslup ve kurallar [CLAUDE.md](CLAUDE.md)'de; bu dosya senin, istediğin gibi değiştir.\n`);
 
 console.log(`✓ ${imza} kuruldu: ${OUT}`);
 console.log(`  ${kategoriler.length} kategori: ${kategoriler.map(k => k.name).join(', ')}`);

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Motoru (içerik değil) defter-kit deposuna kopyalar: src/, scripts/, kit/, skill/.
+// Motoru (içerik değil) defter-kit deposuna kopyalar: src/, scripts/, kit/, plugin/ (skill) ve pazar dosyası.
 //   node scripts/kit-esitle.mjs ../defter-kit
 // Sonra kit klasöründe: npm run build && npm run check, commit, push.
 import fs from 'node:fs';
@@ -12,7 +12,7 @@ if (!hedef || !fs.existsSync(path.join(hedef, 'defter.config.json'))) {
   console.error('Kullanım: node scripts/kit-esitle.mjs <defter-kit klasörü> (içinde defter.config.json olmalı)');
   process.exit(1);
 }
-const MOTOR = ['src', 'scripts', 'kit', 'skill', '.gitignore', 'vercel.json'];
+const MOTOR = ['src', 'scripts', 'kit', 'plugin', '.claude-plugin', '.gitignore', 'vercel.json'];
 let n = 0;
 function kopyala(rel) {
   const from = path.join(ROOT, rel), to = path.join(hedef, rel);
