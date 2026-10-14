@@ -21,6 +21,8 @@ Okuma dış sitelerde değil, defterde yapılır.
 
 **Ürün ölçüsü:** skill "deftere ekle" isteklerinin en az %90'ında yeri doğru seçiyor (bkz. Faz 2 eval).
 
+Kimlerin ne için kullanacağı, deftere bilgi girme yolları, okuma ve tekrar biçimleri ve öncelik önerisi: [KULLANIM.md](KULLANIM.md). Fazların sırası oradaki önceliklere göre güncellenecek.
+
 ## 2. Bugün ne var? (v0.1)
 
 | Parça | Nerede | Durum |
