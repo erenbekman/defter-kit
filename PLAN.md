@@ -220,7 +220,7 @@ Her faz bir **kabul ölçütüyle** biter; ölçüt sağlanmadan sonraki faza ge
 
 ## 7. Şimdi (ilk hafta)
 
-1. [ ] K1–K4 kararlarını konuş ve günlüğe yaz.
+1. [ ] Açık kararları (K1 motor paketi, K2 lisans, K4 GitHub şartı) Eren'e öneriyle sor, cevabı karar günlüğüne yaz. K3 verildi.
 2. [ ] Faz 0'ın tamamı.
 3. [ ] Faz 1 için npm paket adını kontrol et ve CLI iskeletini kur.
 4. [ ] Skill'i gerçek bir okuma kuyruğu partisiyle dene; takılınan her yer bir issue olur.
