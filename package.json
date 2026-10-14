@@ -1,0 +1,16 @@
+{
+  "name": "defter-defter-kit",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Defter kiti · örnek defter: kendi öğrendiğin her şey.",
+  "author": "Defter Kit",
+  "scripts": {
+    "build": "node src/build.mjs",
+    "dev": "node src/build.mjs && node src/serve.mjs",
+    "check": "node src/check.mjs"
+  },
+  "dependencies": {
+    "marked": "15.0.12"
+  }
+}
