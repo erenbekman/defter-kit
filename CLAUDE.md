@@ -1,5 +1,7 @@
 # Defter: çalışma kuralları
 
+> **Ürün üzerinde çalışan oturumlar için:** bu dosya örnek defterin içerik kurallarıdır. Motor, skill ve yol haritası için önce [PLAN.md](PLAN.md)'yi oku.
+
 Bu depo Defter kiti · örnek defter. Defter Kit okuduğu yazılardan, izlediği videolardan ve sohbetlerden öğrendiklerini burada, kendi cümleleriyle ve kaynağıyla birlikte tutar. Konu: kendi öğrendiğin her şey. Bu dosya, deftere içerik ekleyen her oturumun (ve `defter` skill'inin) uyması gereken kurallardır. Üslup ve kuralları değiştirmek serbest; skill her seferinde bu dosyayı okur.
 
 ## Komutlar
