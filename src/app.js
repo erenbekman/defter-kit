@@ -102,6 +102,7 @@
     }
     observeToc();
     onScroll();
+    document.dispatchEvent(new CustomEvent('defter:view', { detail: { id: target.dataset.view } }));
     return true;
   }
   if (SPA) {

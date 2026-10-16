@@ -264,6 +264,21 @@ ${render(s.lines.join('\n'))}
 </section>`;
 }
 
+const ASK_BAR = `<div class="ask no-claude" data-tab="chat">
+<div class="ask-panel" role="dialog" aria-label="Sayfaya sor ve notlar">
+  <div class="ask-top"><div class="ask-tabs" role="tablist"><button type="button" role="tab" data-tab="chat" data-needs-claude hidden>Sohbet</button><button type="button" role="tab" data-tab="notes">Notlar <span class="cnt" data-notes-count></span></button></div><button type="button" class="ask-x" data-ask-clear data-needs-claude hidden>Temizle</button><button type="button" class="ask-x" data-ask-close aria-label="Kapat">Kapat</button></div>
+  <div class="ask-body" data-pane="chat"><div class="ask-log" aria-live="polite"></div></div>
+  <div class="ask-body" data-pane="notes" hidden><div class="ask-notes-list" data-notes-list></div></div>
+</div>
+<div class="ask-quote" hidden><span></span><button type="button" data-quote-x aria-label="Seçimi kaldır">×</button></div>
+<form class="ask-form" autocomplete="off">
+  <input class="ask-in" type="text" placeholder="Bu sayfa hakkında sor…" aria-label="Bu sayfa hakkında Claude'a sor" data-needs-claude hidden>
+  <button type="button" class="ask-chip" data-tab="notes">Notlar <span class="cnt" data-notes-count></span></button>
+  <button type="button" class="ask-stop" data-ask-stop>Durdur</button>
+  <button type="submit" class="ask-send" aria-label="Gönder" data-needs-claude hidden><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+</form>
+</div>`;
+
 function chapterHtml(p) {
   const cat = CAT[p.category];
   const secs = p.secs.map(sectionHtml).join('\n');
@@ -273,23 +288,29 @@ function chapterHtml(p) {
   const nav = `<nav class="ch-nav" aria-label="Önceki ve sonraki bölüm">${prev ? `<a href="${href(prev.id)}"><small>← Önceki · Bölüm ${pad(prev.num)}</small><b>${esc(prev.short)}</b></a>` : '<span></span>'}${next ? `<a class="next-c" href="${href(next.id)}"><small>Sonraki · Bölüm ${pad(next.num)} →</small><b>${esc(next.short)}</b></a>` : ''}</nav>`;
   return `<div class="chapter-grid">
 <aside class="rail" aria-label="Bu sayfada">
+  <div class="minimap" aria-hidden="true" title="Sayfanın haritası: tıkla ya da sürükle"><canvas></canvas><div class="mm-win" hidden></div><div class="mm-tip" hidden></div></div>
+  <div class="rail-nav">
   <a class="back" href="${href('')}">← Defter</a>
   <p class="rail-h">Bu sayfada</p>
   ${toc}
   <div class="rail-prog" data-page-prog="${p.id}"><span>0 / ${p.secs.length} öğrenildi</span><div class="bar"><i></i></div></div>
+  </div>
 </aside>
 <article class="chapter" data-page="${p.id}">
 <header class="ch-head">
   <p class="eyebrow"><span class="num">Bölüm ${pad(p.num)}</span> · ${esc(cat.name)} · ~${mins} dk${p.updated ? ' · ' + esc(p.updated) : ''}</p>
   <h1>${esc(p.title)}</h1>
   ${p.lede ? `<p class="lede">${md.parseInline(p.lede)}</p>` : ''}
+  <button class="gloss" type="button" data-preset="gloss" data-needs-claude hidden><span class="gl-t">Okumadan önce özetle <i>→</i></span><span class="gl-s">Ana fikir, temel iddialar ve konuların haritası; Claude bu sayfadan çıkarır.</span></button>
   <details class="toc-m"><summary>Bu sayfada · ${p.secs.length} konu</summary>${toc}</details>
 </header>
 ${render(p.intro)}
 ${secs}
 ${render(p.footer.join('\n'))}
 ${nav}
+${ASK_BAR}
 </article>
+<aside class="margin" aria-label="Notlar"><p class="margin-hint"><b>Notlar burada durur.</b><span>Bir paragrafı seç, <em>Not al</em>’a bas.</span><span data-needs-claude hidden>Seçip yazmaya başlarsan Claude’a sorarsın.</span></p><div class="margin-notes"></div></aside>
 </div>`;
 }
 
@@ -380,6 +401,7 @@ fs.rmSync(OUT, { recursive: true, force: true });
 fs.mkdirSync(path.join(OUT, 'assets'), { recursive: true });
 const CSS = read('src/style.css');
 const APP = read('src/app.js');
+const READER = read('src/reader.js');
 const ENH = read('src/enhance.js').replace('export function enhance', 'function enhance');
 const META = { ad: CFG.ad, sahip: CFG.sahip, pages: PAGES.map(p => ({ id: p.id, n: p.num, short: p.short, cat: p.category, secs: p.secs.map(s => s.id) })), cats: CATS.map(c => ({ id: c.id, pages: c.pages })) };
 const SEC_TITLES = Object.fromEntries(PAGES.flatMap(p => p.secs.map(s => [s.id, strip(md.parseInline(s.title))])));
@@ -390,7 +412,7 @@ const siteHome = homeHtml();
 const siteChapters = Object.fromEntries(PAGES.map(p => [p.id, fixHashLinks(chapterHtml(p))]));
 const siteQueue = queueHtml();
 fs.writeFileSync(path.join(OUT, 'assets/style.css'), CSS);
-fs.writeFileSync(path.join(OUT, 'assets/app.js'), `${ENH}\n${APP}`);
+fs.writeFileSync(path.join(OUT, 'assets/app.js'), `${ENH}\n${APP}\n${READER}`);
 fs.writeFileSync(path.join(OUT, 'search.json'), JSON.stringify(searchIndex()));
 const shell = (title, desc, label, current, body, extra = '') => `<!doctype html>
 <html lang="${esc(CFG.dil)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -423,7 +445,7 @@ ${THEME_BOOT}${FONTS}
 <script type="application/json" id="defter-meta">${JSON.stringify({ ...META, mode: 'spa' })}</script>
 <script type="application/json" id="search-data">${JSON.stringify(searchIndex()).replace(/</g, '\\u003c')}</script>
 <script type="application/json" id="queue-data">${JSON.stringify({ ...QUEUE, titles: SEC_TITLES, cats: Object.fromEntries(CATS.map(c => [c.id, c.name])), links: Object.fromEntries(Object.keys(SEC_TITLES).map(k => [k, '#' + k])) }).replace(/</g, '\\u003c')}</script>
-<script>${ENH}\n${APP}</script>`;
+<script>${ENH}\n${APP}\n${READER}</script>`;
 fs.writeFileSync(path.join(OUT, 'defter.html'), single);
 
 const kb = n => (n / 1024).toFixed(0) + ' KB';
