@@ -295,11 +295,15 @@
     $$('.ask, .toc-m, .ch-nav, .done-btn, .gloss, script, style', clone).forEach(x => x.remove());
     return clone.textContent.replace(/[ \t]+/g, ' ').replace(/\n\s*\n+/g, '\n\n').trim().slice(0, 60000);
   }
+  const UZUNLUK = { kisa: 'En fazla iki üç cümle.', dengeli: 'Kısa ve net; yaklaşık bir paragraf.', detayli: 'Ayrıntılı; birkaç paragraf, örnek ya da küçük bir kod parçası kullanabilirsin.' };
   function rules() {
     const title = ($('h1', art) || {}).textContent || '';
     return `Sen "${META.ad}" adlı kişisel öğrenme defterinin okuma yardımcısısın. Okur şu an "${title}" bölümünü okuyor; bölümün metni aşağıda <bolum> etiketinin içinde.\n\n` +
-      `- Türkçe, kısa ve net cevap ver; yetişkin bir okura anlatır gibi. Gerekirse somut bir benzetme kullan.\n` +
-      `- Önce bölüm metnine dayan. Metinde olmayan bir şey eklersen başına "Defterde yok:" yaz.\n` +
+      `- Türkçe cevap ver; yetişkin bir okura anlatır gibi. Gerekirse somut bir benzetme kullan.\n` +
+      `- Uzunluk: ${UZUNLUK[document.documentElement.dataset.cevap] || UZUNLUK.dengeli} Okur özellikle başka bir uzunluk isterse ona uy.\n` +
+      (document.documentElement.dataset.kapsam === 'genel'
+        ? `- Bölüm metnini temel al, ama gerektiğinde genel bilginle tamamla. Metinde olmayan kısmı "Defterde yok:" diye başlat.\n`
+        : `- Önce bölüm metnine dayan. Metinde olmayan bir şey eklersen başına "Defterde yok:" yaz.\n`) +
       `- Bir konuya atıf yaparken konu başlığını kullan.\n` +
       `- Biçim: kısa paragraflar, gerekiyorsa madde listesi. Başlık kullanma.\n\n<bolum>\n${pageText()}\n</bolum>`;
   }
@@ -412,7 +416,7 @@
   const rebuild = raf(() => { miniBuild(); layoutMargin(); });
   addEventListener('resize', rebuild);
   if ('ResizeObserver' in window) new ResizeObserver(rebuild).observe(document.body);
-  new MutationObserver(() => miniDraw()).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  new MutationObserver(() => miniDraw()).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'data-palette', 'data-kalem', 'data-fosfor'] });
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => miniDraw());
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(rebuild);
   mount();

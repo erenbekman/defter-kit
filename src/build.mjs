@@ -232,7 +232,6 @@ function render(text) {
 
 // ---------------------------------------------------------------- sayfa parçaları
 const words = s => strip(s).split(/\s+/).filter(Boolean).length;
-const ICON_SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
 
 function jumpMenu(current) {
   return CATS.filter(c => c.pages.length).map(c => `<p>${esc(c.name)}</p>` + c.pages.map(id => {
@@ -249,7 +248,7 @@ function header(current, label) {
   <details class="jump"><summary data-jump-label>${esc(label)}</summary><nav class="jump-menu" aria-label="Bölümler">${jumpMenu(current)}<p>${esc(CFG.ad)}</p><a href="${href('kuyruk')}">Okuma kuyruğu</a></nav></details>
   <div class="head-actions">
     <button class="search-btn" type="button" data-search-open><span class="sb-lbl">Ara</span><kbd>/</kbd><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
-    <button class="icon-btn" type="button" data-theme-toggle aria-label="Temayı değiştir">${ICON_SUN}</button>
+    <div class="ayar-wrap"><button class="icon-btn aa-btn" type="button" data-ayar-open aria-haspopup="dialog" aria-expanded="false" aria-label="Okuma ayarları" title="Okuma ayarları">Aa</button></div>
   </div>
 </header>
 <div class="read-bar" aria-hidden="true"><i></i></div>`;
@@ -393,7 +392,7 @@ function searchIndex() {
 }
 
 const FONTS = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400..700&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&display=swap">';
-const THEME_BOOT = `<script>try{var t=localStorage.getItem('defter:theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>`;
+const THEME_BOOT = `<script>${read('src/ayar-boot.js').trim()}</script>`;
 const SEARCH_UI = `<div class="search" data-search hidden><div class="search-box" role="dialog" aria-modal="true" aria-label="Defterde ara"><input id="search-q" type="search" placeholder="Konu, kavram ya da soru ara…" autocomplete="off"><div class="search-res" data-search-res></div></div></div>`;
 
 // ---------------------------------------------------------------- yazdır
@@ -401,7 +400,7 @@ fs.rmSync(OUT, { recursive: true, force: true });
 fs.mkdirSync(path.join(OUT, 'assets'), { recursive: true });
 const CSS = read('src/style.css');
 const APP = read('src/app.js');
-const READER = read('src/reader.js');
+const READER = read('src/ayarlar.js') + '\n' + read('src/reader.js');
 const ENH = read('src/enhance.js').replace('export function enhance', 'function enhance');
 const META = { ad: CFG.ad, sahip: CFG.sahip, pages: PAGES.map(p => ({ id: p.id, n: p.num, short: p.short, cat: p.category, secs: p.secs.map(s => s.id) })), cats: CATS.map(c => ({ id: c.id, pages: c.pages })) };
 const SEC_TITLES = Object.fromEntries(PAGES.flatMap(p => p.secs.map(s => [s.id, strip(md.parseInline(s.title))])));

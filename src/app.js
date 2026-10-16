@@ -12,15 +12,6 @@
 
   if (typeof enhance === 'function') { try { enhance(); } catch (e) { console.error(e); } }
 
-  // ---------- tema ----------
-  const root = document.documentElement;
-  const isDark = () => root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
-  $$('[data-theme-toggle]').forEach(b => b.addEventListener('click', () => {
-    const t = isDark() ? 'light' : 'dark';
-    root.setAttribute('data-theme', t);
-    try { localStorage.setItem('defter:theme', t); } catch (e) {}
-  }));
-
   // ---------- ilerleme (yalnızca bu tarayıcıda) ----------
   let done = store.get('defter:done', null);
   if (!done) { done = store.get('dev-defteri:js-nasil-dusunur', {}) || {}; store.set('defter:done', done); }
