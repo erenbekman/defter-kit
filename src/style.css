@@ -193,7 +193,7 @@ kbd { font: 500 var(--t-2xs)/1 var(--font-mono); padding: .2em .4em; border: 1px
 .topic li { margin: .35rem 0; }
 .topic li::marker { color: var(--ink-3); }
 .topic strong, .topic b { font-weight: 600; }
-code.i, .topic :not(pre) > code, .chapter :not(pre) > code { font: 500 .84em/1 var(--font-mono); background: var(--paper-2); border: 1px solid var(--rule); padding: .12em .35em; border-radius: 4px; white-space: break-spaces; }
+code.i, .topic :not(pre) > code, .chapter :not(pre) > code { font: 500 .84em/1.5 var(--font-mono); -webkit-box-decoration-break: clone; box-decoration-break: clone; background: var(--paper-2); border: 1px solid var(--rule); padding: .12em .35em; border-radius: 4px; white-space: break-spaces; }
 mark { background: color-mix(in srgb, var(--hl) 40%, transparent); color: inherit; padding: 0 .15em; border-radius: 3px; }
 .topic h3.sub, .chapter > h3 { margin: 2.1rem 0 .8rem; font: 600 var(--t-lg)/1.3 var(--font-ui); letter-spacing: -.015em; }
 
