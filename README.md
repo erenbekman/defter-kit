@@ -4,6 +4,8 @@ Kendi öğrenme defterini kur. Okuduğun yazıyı, izlediğin videoyu ya da Clau
 
 *Build your own learning notebook: tell Claude "add this to my defter" from any chat and it lands in the right chapter, verified and sourced. Turkish first.*
 
+<p align="center"><img src=".github/screenshot.png" alt="A defter page: chapter outline, a topic with its summary box, and the notes panel" width="760"></p>
+
 ## Ne var içinde?
 
 | Parça | Ne yapar |
