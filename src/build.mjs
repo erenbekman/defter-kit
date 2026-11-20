@@ -248,6 +248,7 @@ function render(text) {
         const rows = b.body.split('\n').filter(l => /^- .+::/.test(l)).map(l => l.slice(2).split('::')).map(([f, ...r]) => `<div class="kt"><dt>${md.parseInline(f.trim())}</dt><dd>${md.parseInline(r.join('::').trim())}</dd></div>`).join('');
         return `<div class="kartlar">${b.arg ? `<p class="kartlar-h"><span class="tag">Kartlar</span>${md.parseInline(b.arg)}</p>` : ''}<dl>${rows}</dl></div>\n`;
       }
+      case 'filmler': return filmlerHtml();
       case 'kaynaklar': return `<div class="sources"><h2>${esc(b.arg || 'Kaynaklar')}</h2>${inner()}</div>\n`;
       default: throw new Error('Bilinmeyen direktif: ' + b.name);
     }
@@ -256,6 +257,44 @@ function render(text) {
 
 for (const p of PAGES) for (const s of p.secs) kartTopla(p, s, s.lines.join('\n'));
 const KART_SAY = {}; for (const k of KARTS) KART_SAY[k.s] = (KART_SAY[k.s] || 0) + 1;
+
+// Letterboxd dışa aktarımı (data/letterboxd/*.csv) → Film arşivi; :::filmler bloğu çizer
+function csvOku(f) {
+  const file = path.join(ROOT, 'data/letterboxd', f);
+  if (!fs.existsSync(file)) return [];
+  const rows = []; let row = [], cell = '', q = false;
+  const t = fs.readFileSync(file, 'utf8').replace(/\r/g, '');
+  for (let i = 0; i < t.length; i++) {
+    const c = t[i];
+    if (q) { if (c === '"' && t[i + 1] === '"') { cell += '"'; i++; } else if (c === '"') q = false; else cell += c; continue; }
+    if (c === '"') q = true; else if (c === ',') { row.push(cell); cell = ''; } else if (c === '\n') { row.push(cell); rows.push(row); row = []; cell = ''; } else cell += c;
+  }
+  if (cell || row.length) { row.push(cell); rows.push(row); }
+  const [h, ...r] = rows;
+  return r.filter(x => x.length > 1).map(x => Object.fromEntries(h.map((k, i) => [k, x[i] || ''])));
+}
+function filmlerHtml() {
+  const izlenen = csvOku('watched.csv'), puan = Object.fromEntries(csvOku('ratings.csv').map(r => [r['Letterboxd URI'], Number(r.Rating)])), liste = csvOku('watchlist.csv');
+  if (!izlenen.length && !liste.length) return '<p>Letterboxd verisi yok: <code>data/letterboxd/</code> klasörüne dışa aktarılan CSV dosyalarını koy.</p>';
+  const yildiz = n => n ? '★'.repeat(Math.floor(n)) + (n % 1 ? '½' : '') : '';
+  const puanli = Object.values(puan), ort = puanli.length ? (puanli.reduce((a, b) => a + b, 0) / puanli.length).toFixed(1) : '–';
+  const satir = (f, tur) => {
+    const p = puan[f['Letterboxd URI']] || 0, ad = f.Name, yil = f.Year;
+    return `<li data-q="${esc((ad + ' ' + yil).toLocaleLowerCase('tr'))}" data-p="${p}" data-y="${esc(yil)}" data-t="${esc(f.Date)}"><span class="fl-ad">${esc(ad)}<small>${esc(yil)}</small></span><span class="fl-p" aria-label="${p ? p + ' yıldız' : 'puansız'}">${yildiz(p)}</span><span class="fl-act"><a href="${esc(f['Letterboxd URI'])}" target="_blank" rel="noopener">Letterboxd ↗</a>${MODE === 'spa' ? `<button type="button" data-film-not data-ad="${esc(ad)}" data-yil="${esc(yil)}" data-url="${esc(f['Letterboxd URI'])}" data-puan="${p}" data-tur="${tur}" hidden>Not aç</button>` : ''}</span></li>`;
+  };
+  const yillar = {}; izlenen.forEach(f => { const y = (f.Date || '').slice(0, 4); if (y) yillar[y] = (yillar[y] || 0) + 1; });
+  const sirala = a => [...a].sort((x, y) => String(y.Date).localeCompare(String(x.Date)));
+  return `<div class="filmler">
+<dl class="q-stats"><div><dt>İzlenen</dt><dd>${izlenen.length}</dd></div><div><dt>Puanlanan</dt><dd>${puanli.length}</dd></div><div><dt>Ortalama</dt><dd>${ort} ★</dd></div><div><dt>İzlenecek</dt><dd>${liste.length}</dd></div></dl>
+<p class="fl-yillar">${Object.entries(yillar).sort().map(([y, n]) => `<span><b>${y}</b> ${n} film</span>`).join('')}</p>
+<div class="fl-ctl"><div class="q-filter" role="tablist"><button type="button" data-fl-sekme="izlenen" aria-pressed="true">İzlediklerim <small>${izlenen.length}</small></button><button type="button" data-fl-sekme="liste" aria-pressed="false">İzleme listesi <small>${liste.length}</small></button></div>
+<input type="search" data-fl-ara placeholder="Film ya da yıl ara…" aria-label="Filmlerde ara"><select data-fl-sira aria-label="Sırala"><option value="t">Son eklenen</option><option value="p">Puan</option><option value="y">Yıl</option><option value="a">Ad</option></select></div>
+<ul class="fl-list" data-fl-list="izlenen">${sirala(izlenen).map(f => satir(f, 'izlenen')).join('')}</ul>
+<ul class="fl-list" data-fl-list="liste" hidden>${sirala(liste).map(f => satir(f, 'liste')).join('')}</ul>
+<p class="fl-bos" data-fl-bos hidden>Bu aramayla eşleşen film yok.</p>
+</div>
+`;
+}
 
 // ---------------------------------------------------------------- sayfa parçaları
 const words = s => strip(s).split(/\s+/).filter(Boolean).length;

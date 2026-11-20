@@ -167,7 +167,7 @@
     if (S.edit === n.id) {
       const turSec = Object.entries(TUR).map(([k, v]) => `<option value="${k}"${k === tur ? ' selected' : ''}>${v}</option>`).join('');
       return `<article class="kn editing" data-k="${esc(n.id)}"><input class="kn-bas" value="${esc(n.baslik)}" placeholder="Başlık (isteğe bağlı)" aria-label="Başlık">
-<textarea class="kn-ta" rows="5" aria-label="Not">${esc(n.metin)}</textarea>
+<textarea class="kn-ta" rows="${Math.min(18, Math.max(5, String(n.metin || "").split("\n").length + 1))}" aria-label="Not">${esc(n.metin)}</textarea>
 <input class="kn-url" value="${esc(n.url)}" placeholder="Link (isteğe bağlı)" aria-label="Link">
 <div class="kn-ed"><select class="kn-kat" aria-label="Kategori">${katSecenek(n.kategori || '')}</select><select class="kn-tur-s" aria-label="Tür">${turSec}</select>
 <span class="sp"></span><button type="button" data-a="vazgec">Vazgeç</button><button type="button" class="pri" data-a="kaydet">Kaydet</button></div></article>`;
@@ -231,6 +231,7 @@ ${S.hazir ? `<h2 class="nv-h2">Notlar <span>${notSay ? notSay + ' not' : 'henüz
     }
     const l = $('[data-nv-liste]', nv), items = filtreli();
     l.innerHTML = items.length ? items.map(kart).join('') : `<p class="nv-bos">${S.f.arsiv ? 'Arşiv boş.' : S.f.q ? 'Bu aramayla eşleşen not yok.' : (sayfaSay() ? `Bu kategoride henüz hızlı not yok; konular yukarıdaki ${sayfaSay()} bölümde. Aklına geleni yukarıya yaz ya da Claude'a “not al: …” de.` : 'Burada henüz not yok. Yukarıya yaz ya da Claude\'a “not al: …” de.')}</p>`;
+    if (S.kaydir) { const k = $(`.kn[data-k="${S.kaydir}"]`, nv); if (k) { S.kaydir = null; requestAnimationFrame(() => k.scrollIntoView({ block: 'center' })); const ta = $('.kn-ta', k); if (ta) ta.focus({ preventScroll: true }); } }
   }
 
   // görünüm içi etkileşimler
@@ -331,7 +332,7 @@ ${S.hazir ? `<h2 class="nv-h2">Notlar <span>${notSay ? notSay + ' not' : 'henüz
       let ilk = true;
       S.col.onSnapshot(snap => {
         S.list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        if (ilk) { ilk = false; S.hazir = true; $$('[data-raf-form]').forEach(el => { el.innerHTML = formHtml(''); el.hidden = false; }); $$('[data-nots-link]').forEach(el => { el.hidden = false; }); }
+        if (ilk) { ilk = false; S.hazir = true; $$('[data-film-not]').forEach(el => { el.hidden = false; }); $$('[data-raf-form]').forEach(el => { el.innerHTML = formHtml(''); el.hidden = false; }); $$('[data-nots-link]').forEach(el => { el.hidden = false; }); }
         rafCiz();
         const odak = document.activeElement;
         const yaziyor = odak && nv && nv.contains(odak) && (odak.matches('.kn-ta, .kn-bas, .kn-url, [data-hizli] textarea, [data-nv-q]'));
@@ -344,4 +345,47 @@ ${S.hazir ? `<h2 class="nv-h2">Notlar <span>${notSay ? notSay + ' not' : 'henüz
     } catch (e) { /* notlar kapalı kalır */ }
   })();
   document.addEventListener('defter:view', e => { if (e.detail && e.detail.id === 'notlar') listeCiz(); });
+  const FILM_SABLON = '**İlk izlenim:** \n\n**Üç sahne:**\n- \n- \n- \n\n**Biçim (kadraj, kurgu, ses…):** \n\n**Yönetmenin imzası:** \n\n**Bağlantılar:** \n\n**Replik ya da görüntü:** \n\n**Puan gerekçesi:** ';
+  document.addEventListener('click', async e => {
+    const b = e.target.closest('[data-film-not]'); if (!b || !S.col) return;
+    const ad = b.dataset.ad, yil = b.dataset.yil, baslik = `${ad} (${yil})`;
+    const var_ = S.list.find(n => n.url === b.dataset.url && n.durum !== 'arsiv');
+    let id = var_ && var_.id;
+    if (!id) {
+      id = yeniId(); const now = new Date().toISOString(), p = Number(b.dataset.puan) || 0;
+      const katVar = katlar().some(k => k.id === 'film');
+      try {
+        await S.col.doc(id).set({ baslik, metin: b.dataset.tur === 'liste' ? '' : FILM_SABLON + (p ? `${p} ★ (Letterboxd)` : ''), tur: b.dataset.tur === 'liste' ? 'yapilacak' : 'not', url: b.dataset.url, kategori: katVar ? 'film' : '', etiketler: [b.dataset.tur === 'liste' ? 'izlenecek' : 'film'], durum: 'acik', sabit: false, bitti: false, kaynak: 'sayfa', eklenme: now, guncelleme: now });
+      } catch (err) { b.textContent = 'Açılamadı'; return; }
+    }
+    S.f = { kat: 'film', tur: 'hepsi', q: '', arsiv: false }; S.edit = b.dataset.tur === 'liste' ? null : id; S.kaydir = id;
+    location.hash = '#notlar';
+  });
+})();
+
+// Film arşivi (:::filmler): sekme, arama, sıralama ve "Not aç"
+(function () {
+  const kutu = document.querySelector('.filmler');
+  if (!kutu) return;
+  const $$ = (s, el = document) => Array.from(el.querySelectorAll(s));
+  let sekme = 'izlenen';
+  function uygula() {
+    const q = (kutu.querySelector('[data-fl-ara]').value || '').trim().toLocaleLowerCase('tr');
+    const sira = kutu.querySelector('[data-fl-sira]').value;
+    let gorunen = 0;
+    $$('[data-fl-list]', kutu).forEach(ul => {
+      ul.hidden = ul.dataset.flList !== sekme;
+      const li = $$('li', ul);
+      li.sort((a, b) => sira === 'p' ? b.dataset.p - a.dataset.p || b.dataset.t.localeCompare(a.dataset.t)
+        : sira === 'y' ? b.dataset.y.localeCompare(a.dataset.y) : sira === 'a' ? a.dataset.q.localeCompare(b.dataset.q, 'tr') : b.dataset.t.localeCompare(a.dataset.t));
+      li.forEach(x => { x.hidden = !!q && !x.dataset.q.includes(q); ul.appendChild(x); if (!ul.hidden && !x.hidden) gorunen++; });
+    });
+    kutu.querySelector('[data-fl-bos]').hidden = gorunen > 0;
+  }
+  kutu.addEventListener('input', e => { if (e.target.matches('[data-fl-ara]')) uygula(); });
+  kutu.addEventListener('change', e => { if (e.target.matches('[data-fl-sira]')) uygula(); });
+  kutu.addEventListener('click', e => {
+    const b = e.target.closest('[data-fl-sekme]');
+    if (b) { sekme = b.dataset.flSekme; $$('[data-fl-sekme]', kutu).forEach(x => x.setAttribute('aria-pressed', String(x === b))); uygula(); }
+  });
 })();

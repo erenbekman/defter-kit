@@ -939,3 +939,27 @@ ol.kurallar > li::before, ol.rules > li::before { content: counter(k); width: 1.
 .tk-bos p { margin: 0 0 .6rem; font: 400 1rem/1.55 var(--font-prose); color: var(--ink-2); }
 .tk-raflar { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; margin-top: 1rem; }
 .tk-raflar .btn small { font: 500 var(--t-2xs)/1 var(--font-mono); opacity: .7; }
+
+/* Film arşivi */
+.filmler { margin: 1rem 0 1.6rem; max-width: min(100%, 60rem); }
+.fl-yillar { display: flex; flex-wrap: wrap; gap: .4rem 1rem; margin: 0 0 1.2rem; font: 500 var(--t-xs)/1.4 var(--font-mono); color: var(--ink-3); }
+.fl-yillar b { color: var(--ink); font-weight: 600; }
+.fl-ctl { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin-bottom: .8rem; }
+.fl-ctl .q-filter { margin: 0; }
+.fl-ctl .q-filter small { font: 500 var(--t-2xs)/1 var(--font-mono); opacity: .7; margin-left: .25rem; }
+.fl-ctl input { flex: 1 1 12rem; min-width: 0; padding: .5rem .7rem; border: 1px solid var(--rule-2); border-radius: 8px; background: var(--paper); color: var(--ink); font: 400 var(--t-sm)/1.2 var(--font-ui); }
+.fl-ctl select { padding: .5rem .55rem; border: 1px solid var(--rule-2); border-radius: 8px; background: var(--paper); color: var(--ink); font: 500 var(--t-sm)/1.2 var(--font-ui); }
+.fl-list { list-style: none; margin: 0; padding: 0 !important; border: 1px solid var(--rule); border-radius: var(--radius); background: var(--paper-2); max-height: 70vh; overflow: auto; }
+.fl-list li { display: grid; grid-template-columns: minmax(0, 1fr) 5.2rem auto; gap: .8rem; align-items: center; margin: 0 !important; padding: .55rem .9rem; border-top: 1px solid var(--rule); font-family: var(--font-ui) !important; }
+.fl-list li:first-child { border-top: 0; }
+.fl-ad { font: 500 .95rem/1.35 var(--font-ui); overflow-wrap: anywhere; }
+.fl-ad small { margin-left: .45rem; font: 500 var(--t-xs)/1 var(--font-mono); color: var(--ink-3); }
+.fl-p { color: var(--warn); font-size: .9rem; letter-spacing: .02em; white-space: nowrap; }
+.fl-act { display: flex; gap: .4rem; align-items: center; font-size: var(--t-xs); white-space: nowrap; }
+.fl-act a { color: var(--ink-3); text-decoration: none; }
+.fl-act a:hover { color: var(--accent); }
+.fl-act button { border: 1px solid var(--rule-2); background: var(--paper); color: var(--ink-2); border-radius: 6px; padding: .3rem .5rem; font: 600 var(--t-2xs)/1 var(--font-ui); cursor: pointer; }
+.fl-act button:hover { color: var(--ink); border-color: var(--ink-3); }
+.fl-bos { color: var(--ink-3); font-size: var(--t-sm); }
+@media (max-width: 560px) { .fl-list li { grid-template-columns: minmax(0, 1fr) auto; } .fl-act { grid-column: 1 / -1; } }
+.kn.editing { grid-column: 1 / -1; }
