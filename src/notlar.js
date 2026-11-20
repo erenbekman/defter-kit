@@ -185,9 +185,18 @@ ${S.yaz ? `<span class="kn-act">${!n.kategori && S.sample && n.durum !== 'arsiv'
     const pmap = Object.fromEntries((META.pages || []).map(p => [p.id, p]));
     const kelime = (k ? k.kelime || 0 : 0) + S.list.filter(n => f.kat === 'hepsi' || (f.kat === 'gelen' ? !n.kategori : n.kategori === f.kat)).reduce((a, n) => a + sayKelime(n.metin), 0);
     box.innerHTML = `<div class="nv-kapak">${K.kapak({ id: f.kat === 'gelen' ? 'gelen-kutusu' : f.kat === 'hepsi' ? 'butun-notlar' : f.kat, ad, kelime, imza, sira: sira(f.kat) })}</div>
-<div class="nv-bilgi"><p class="eyebrow"><b>Notlar</b>${f.kat !== 'hepsi' ? ' · <a href="#notlar" data-git="hepsi">bütün notlar</a>' : ''}</p><h1>${esc(ad)}</h1><p class="lede">${esc(aciklama)}</p>
-${sayfalar.length ? `<p class="nv-sayfalar">${sayfalar.map(id => pmap[id] ? `<a href="${'#' + id}">${String(pmap[id].n).padStart(2, '0')} · ${esc(pmap[id].short)}</a>` : '').join('')}</p>` : ''}</div>`;
+<div class="nv-bilgi"><p class="eyebrow"><b>${sayfalar.length ? 'Kategori' : 'Notlar'}</b>${f.kat !== 'hepsi' ? ' · <a href="#notlar" data-git="hepsi">bütün notlar</a>' : ''}</p><h1>${esc(ad)}</h1><p class="lede">${esc(aciklama)}</p></div>`;
+    // kategorinin bölümleri: konular bunlarda; notlar altta ayrı bir katman
+    const bb = $('[data-nv-bolum]', nv);
+    if (bb) {
+      const konu = sayfalar.reduce((a, id) => a + ((pmap[id] && pmap[id].secs) || []).length, 0);
+      const kartlar = sayfalar.map(id => { const c = document.querySelector('.view[data-view="ana-sayfa"] .card[data-card="' + id + '"]'); return c ? c.outerHTML : ''; }).join('');
+      const notSay = S.list.filter(n => n.durum !== 'arsiv' && n.kategori === f.kat).length;
+      bb.innerHTML = sayfalar.length ? `<section class="nv-sec"><h2>Bölümler <span>${sayfalar.length} bölüm · ${konu} konu</span></h2><div class="cards">${kartlar}</div></section>
+<h2 class="nv-h2">Notlar <span>${notSay ? notSay + ' not' : 'henüz yok'}</span></h2>` : '';
+    }
   }
+  const sayfaSay = () => { const c = (META.cats || []).find(c => c.id === S.f.kat); return c ? (c.pages || []).length : 0; };
   function filtreCiz() {
     const box = $('[data-nv-filtre]', nv); if (!box) return;
     const ak = aktif(), f = S.f;
@@ -207,7 +216,7 @@ ${sayfalar.length ? `<p class="nv-sayfalar">${sayfalar.map(id => pmap[id] ? `<a 
       if (fk && fk.dataset.anahtar !== anahtar) { fk.dataset.anahtar = anahtar; fk.innerHTML = anahtar ? formHtml(['hepsi', 'gelen'].includes(S.f.kat) ? '' : S.f.kat) : ''; }
     }
     const l = $('[data-nv-liste]', nv), items = filtreli();
-    l.innerHTML = items.length ? items.map(kart).join('') : `<p class="nv-bos">${S.f.arsiv ? 'Arşiv boş.' : S.f.q ? 'Bu aramayla eşleşen not yok.' : 'Burada henüz not yok. Yukarıya yaz ya da Claude\'a “deftere not al: …” de.'}</p>`;
+    l.innerHTML = items.length ? items.map(kart).join('') : `<p class="nv-bos">${S.f.arsiv ? 'Arşiv boş.' : S.f.q ? 'Bu aramayla eşleşen not yok.' : (sayfaSay() ? `Bu kategoride henüz hızlı not yok; konular yukarıdaki ${sayfaSay()} bölümde. Aklına geleni yukarıya yaz ya da Claude'a “not al: …” de.` : 'Burada henüz not yok. Yukarıya yaz ya da Claude\'a “not al: …” de.')}</p>`;
   }
 
   // görünüm içi etkileşimler

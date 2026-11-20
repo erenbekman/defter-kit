@@ -442,7 +442,7 @@ MODE = 'spa';
 const views = [`<div class="view" data-view="ana-sayfa" data-label="Bölümler">${homeHtml()}</div>`]
   .concat(PAGES.map(p => `<div class="view" data-view="${p.id}" data-label="Bölüm ${pad(p.num)}" hidden>${chapterHtml(p)}</div>`))
   .concat([`<div class="view" data-view="kuyruk" data-label="Okuma kuyruğu" hidden>${queueHtml()}</div>`])
-  .concat([`<div class="view" data-view="notlar" data-label="Notlar" hidden><div class="home notlar-page"><header class="nv-head" data-nv-head></header><div data-nv-form></div><div class="nv-filtre" data-nv-filtre></div><p class="nv-msg" data-nv-msg role="status"></p><div class="nv-liste" data-nv-liste></div></div></div>`]);
+  .concat([`<div class="view" data-view="notlar" data-label="Notlar" hidden><div class="home notlar-page"><header class="nv-head" data-nv-head></header><div data-nv-bolum></div><div data-nv-form></div><div class="nv-filtre" data-nv-filtre></div><p class="nv-msg" data-nv-msg role="status"></p><div class="nv-liste" data-nv-liste></div></div></div>`]);
 const single = `<title>${esc(CFG.sahip)} · ${esc(CFG.ad)}</title>
 ${THEME_BOOT}${FONTS}
 <style>${CSS}</style>

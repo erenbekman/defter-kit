@@ -880,3 +880,8 @@ ol.kurallar > li::before, ol.rules > li::before { content: counter(k); width: 1.
   .raf-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 6.4rem), 1fr)); gap: 1.1rem .8rem; }
   .hizli-ipucu { display: none; }
 }
+
+.nv-sec { margin-bottom: 2.2rem; }
+.nv-sec h2, .nv-h2 { display: flex; align-items: baseline; gap: .7rem; margin: 0 0 1rem; font: 600 var(--t-xl)/1.2 var(--font-ui); letter-spacing: -.02em; }
+.nv-sec h2 span, .nv-h2 span { font: 500 var(--t-xs)/1.4 var(--font-mono); color: var(--ink-3); letter-spacing: 0; }
+.nv-h2 { padding-top: 1.6rem; border-top: 1px solid var(--rule); }
