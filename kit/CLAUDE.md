@@ -34,7 +34,7 @@ Bölüm numaraları kategori sırası + `order` alanından otomatik çıkar. Yen
 3. **Kaynak her zaman yazılır.** Bir okumadan gelen ek `:::okuma` bloğunda `Kaynak: [Başlık — Yazar](link)` satırıyla biter.
 4. **Hatalar düzeltilir ve işaretlenir.** Kaynaktaki yanlış sessizce düzeltilmez; `:::duzeltme` bloğunda neyin yanlış olduğu ve doğrusu yazılır. Kaynaksız istatistik ve pazarlama rakamı belirtilir.
 5. **Zayıf kaynak atlanır, gerekçesiyle.** Reklam, tekrar, açılmayan sayfa, spekülasyon → arşivde `a` (atlandı) ve kısa gerekçe.
-6. **Üslup:** her konu bir benzetmeyle (`:::kisaca`) başlar, sonra gerçekte ne olduğuna, örneğe ve en sık düşülen tuzağa iner. Okur: {{OKUR}}. Kısa ve net. Her konu `:::ozet` (tek cümle) ve `:::quiz` ile biter.
+6. **Üslup:** her konu bir benzetmeyle (`:::kisaca`) başlar, sonra gerçekte ne olduğuna, örneğe ve en sık düşülen tuzağa iner. Okur: {{OKUR}}. Kısa ve net. Her konu `:::ozet` (tek cümle) ve `:::quiz` ile biter; ezberlenecek bir şey varsa `:::kartlar` da eklenir.
 7. **Gizli bilgi yok.** API anahtarı, token, parola, kişisel veri (adres, telefon, müşteri bilgisi) asla deftere girmez; örneklerde açıkça uydurma değer kullan.
 8. **Doğrulama:** sayı, sürüm, fiyat ve ürün özelliği iddiaları birincil kaynaktan kontrol edilir. Zamanla eskiyen bilgiye tarih yazılır.
 
@@ -81,11 +81,20 @@ Soru metni?
 | `:::akis Etiket` | `- düğüm` satırları; `→ yazı` oka etiket ekler; `- ~son` kesik çizgili düğüm |
 | `:::kavramlar` | Kavram kartları: her kart `#### Ad \| alt başlık`, içinde `> benzetme` ve gövde |
 | `:::kurallar` | Numaralı kural listesi (içinde `1. ...`) |
+| `:::kartlar Başlık` | Tekrar kartları: her satır `- ön yüz :: arka yüz`; konu "Öğrendim" deyince günlük tekrara girer |
 | `:::kaynaklar Başlık` | Sayfa sonu kaynak listesi |
 
 - Kod bloğu başlığı: ` ```js title="dosya.js: ne gösteriyor" `
 - İç bağlantı: `[metin](#konu-id)` ya da `[metin](#sayfa-id)`.
 - Ham HTML serbest, ama boş satır içermesin.
+
+## Tekrar
+
+Her `:::quiz` ve `:::kartlar` satırı bir tekrar kartıdır (id: `q-<konu-id>`, `k-<konu-id>-<sıra>`; konu id'si değişmedikçe ilerleme korunur). Kartlar, konu "Öğrendim" diye işaretlenince ya da Tekrar ekranında rafı açınca günlük tekrara girer. Aralıklar 1, 2, 4, 7, 15, 30, 60, 120 gün; günde en çok 12 yeni kart. İlerleme veritabanında `tekrar/<kart-id>` (`{kutu, sonraki, son, ilk, dogru, yanlis}`), raf ayarı `tekrar/_ayar`; sahibe özel.
+
+Ezberlenecek her şey (kalıp, kavram, tarih, kim kimden etkilendi) konunun sonunda bir `:::kartlar` bloğuna da yazılır: ön yüz soru ya da Türkçe cümle, arka yüz kısa cevap.
+
+Kategoriler `data/categories.json`'da bir **rafa** bağlanır (`"raf": "yazilim"`); raflar `defter.config.json`'daki `raflar` listesinden gelir ve ana sayfada ayrı başlıklarla durur.
 
 ## Hızlı notlar
 

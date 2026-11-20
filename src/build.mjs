@@ -71,6 +71,24 @@ for (const p of PAGES) {
   p.words = p.body.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
   p.mins = Math.max(5, Math.round(p.words / 200 / 5) * 5);
 }
+// Tekrar kartları: her :::quiz bir kart, her :::kartlar satırı bir kart (id kalıcıdır: bölüm id'si + sıra)
+const KARTS = [];
+function kartTopla(p, sec, text) {
+  let qi = 0, ki = 0;
+  const walk = t => splitDirectives(t).forEach(bl => {
+    if (bl.md !== undefined) return;
+    if (bl.name === 'quiz') {
+      const [q, ...a] = bl.body.split(/\n---\n/);
+      KARTS.push({ id: `q-${sec.id}${qi ? '-' + qi : ''}`, s: sec.id, p: p.id, c: p.category, t: 'quiz', q: render(q), a: render(a.join('\n---\n')) }); qi++;
+    } else if (bl.name === 'kartlar') {
+      bl.body.split('\n').filter(l => /^- .+::/.test(l)).forEach(l => {
+        const [f, ...r] = l.slice(2).split('::');
+        KARTS.push({ id: `k-${sec.id}-${ki}`, s: sec.id, p: p.id, c: p.category, t: 'kart', q: md.parseInline(f.trim()), a: md.parseInline(r.join('::').trim()) }); ki++;
+      });
+    } else walk(bl.body);
+  });
+  walk(text);
+}
 const SEC_PAGE = {};
 for (const p of PAGES) for (const s of p.secs) SEC_PAGE[s.id] = p.id;
 
@@ -225,11 +243,19 @@ function render(text) {
           return `<div class="cpt"><div class="cpt-k">${md.parseInline(k)}${small ? `<small>${md.parseInline(small)}</small>` : ''}</div><div class="cpt-v">${render(body)}</div></div>`;
         }).join('') + '</div>\n';
       }
+      case 'kartlar': {
+        // "- ön yüz :: arka yüz" satırları; her satır bir tekrar kartı olur
+        const rows = b.body.split('\n').filter(l => /^- .+::/.test(l)).map(l => l.slice(2).split('::')).map(([f, ...r]) => `<div class="kt"><dt>${md.parseInline(f.trim())}</dt><dd>${md.parseInline(r.join('::').trim())}</dd></div>`).join('');
+        return `<div class="kartlar">${b.arg ? `<p class="kartlar-h"><span class="tag">Kartlar</span>${md.parseInline(b.arg)}</p>` : ''}<dl>${rows}</dl></div>\n`;
+      }
       case 'kaynaklar': return `<div class="sources"><h2>${esc(b.arg || 'Kaynaklar')}</h2>${inner()}</div>\n`;
       default: throw new Error('Bilinmeyen direktif: ' + b.name);
     }
   }).join('');
 }
+
+for (const p of PAGES) for (const s of p.secs) kartTopla(p, s, s.lines.join('\n'));
+const KART_SAY = {}; for (const k of KARTS) KART_SAY[k.s] = (KART_SAY[k.s] || 0) + 1;
 
 // ---------------------------------------------------------------- sayfa parçaları
 const words = s => strip(s).split(/\s+/).filter(Boolean).length;
@@ -246,7 +272,7 @@ function header(current, label) {
 <header class="site-head">
   <a class="brand" href="${href('')}"><span class="mark">${esc(CFG.ad.charAt(0).toLocaleLowerCase(CFG.dil))}</span><span class="txt">${esc(CFG.ad)}</span><span class="by">${esc(CFG.sahip)}</span></a>
   <span class="crumb-sep">/</span>
-  <details class="jump"><summary data-jump-label>${esc(label)}</summary><nav class="jump-menu" aria-label="Bölümler">${jumpMenu(current)}<p>${esc(CFG.ad)}</p>${MODE === 'spa' ? '<a href="#notlar" data-nots-link hidden>Notlar</a>' : ''}<a href="${href('kuyruk')}">Okuma kuyruğu</a></nav></details>
+  <details class="jump"><summary data-jump-label>${esc(label)}</summary><nav class="jump-menu" aria-label="Bölümler">${jumpMenu(current)}<p>${esc(CFG.ad)}</p>${MODE === 'spa' ? '<a href="#tekrar">Tekrar</a><a href="#notlar" data-nots-link hidden>Notlar</a>' : ''}<a href="${href('kuyruk')}">Okuma kuyruğu</a></nav></details>
   <div class="head-actions">
     <button class="search-btn" type="button" data-search-open><span class="sb-lbl">Ara</span><kbd>/</kbd><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
     <div class="ayar-wrap"><button class="icon-btn aa-btn" type="button" data-ayar-open aria-haspopup="dialog" aria-expanded="false" aria-label="Okuma ayarları" title="Okuma ayarları">Aa</button></div>
@@ -260,7 +286,7 @@ function sectionHtml(s, i) {
   return `<section class="topic" id="${s.id}">
 <header class="t-head"><span class="t-num">${n}</span><h2><a class="anchor" href="${href(s.id)}" aria-label="Bu bölüme bağlantı">#</a>${md.parseInline(s.title)}</h2>${s.q ? `<p class="question">${md.parseInline(s.q)}</p>` : ''}</header>
 ${render(s.lines.join('\n'))}
-<div class="done-row"><button class="done-btn" type="button" data-done="${s.id}" aria-pressed="false"><span class="box"></span>Öğrendim</button></div>
+<div class="done-row">${KART_SAY[s.id] ? `<span class="kart-say" title="Öğrendim dediğinde bu kartlar günlük tekrara girer">${KART_SAY[s.id]} tekrar kartı</span>` : ''}<button class="done-btn" type="button" data-done="${s.id}" aria-pressed="false"><span class="box"></span>Öğrendim</button></div>
 </section>`;
 }
 
@@ -337,7 +363,7 @@ ${cards ? `<div class="cards">${cards}</div>` : ''}${soon}
   <p class="eyebrow"><b>${esc(CFG.imza)}</b> · ${PAGES.length} bölüm</p>
   <h1>${CFG.baslik}</h1>
   <p class="lede">${esc(CFG.lede)}</p>
-  <div class="cta"><a class="btn pri" href="${href(first.id)}">Bölüm 01'den başla →</a><button class="btn" type="button" data-search-open>Defterde ara</button></div>
+  <div class="cta">${MODE === 'spa' ? '<a class="btn pri tk-cta" href="#tekrar" data-tekrar-cta>Bugünün tekrarı →</a>' : ''}<a class="btn${MODE === 'spa' ? '' : ' pri'}" href="${href(first.id)}">Bölüm 01'den başla →</a><button class="btn" type="button" data-search-open>Defterde ara</button></div>
   <dl class="stats">
     <div><dt>Bölüm</dt><dd>${PAGES.length}</dd></div>
     <div><dt>Konu</dt><dd>${totalSecs}</dd></div>
@@ -406,9 +432,9 @@ fs.rmSync(OUT, { recursive: true, force: true });
 fs.mkdirSync(path.join(OUT, 'assets'), { recursive: true });
 const CSS = read('src/style.css');
 const APP = read('src/app.js');
-const READER = ['ayarlar', 'kapak', 'notlar', 'reader'].map(f => read(`src/${f}.js`)).join('\n');
+const READER = ['ayarlar', 'kapak', 'notlar', 'tekrar', 'reader'].map(f => read(`src/${f}.js`)).join('\n');
 const ENH = read('src/enhance.js').replace('export function enhance', 'function enhance');
-const META = { ad: CFG.ad, sahip: CFG.sahip, pages: PAGES.map(p => ({ id: p.id, n: p.num, short: p.short, cat: p.category, secs: p.secs.map(s => s.id) })), cats: CATS.map(c => ({ id: c.id, name: c.name, desc: c.desc, words: c.pages.reduce((a, id) => a + PAGE[id].words, 0), pages: c.pages })) };
+const META = { ad: CFG.ad, sahip: CFG.sahip, pages: PAGES.map(p => ({ id: p.id, n: p.num, short: p.short, cat: p.category, secs: p.secs.map(s => s.id) })), raflar: CFG.raflar || [], cats: CATS.map(c => ({ id: c.id, name: c.name, desc: c.desc, raf: c.raf || '', words: c.pages.reduce((a, id) => a + PAGE[id].words, 0), pages: c.pages })) };
 const SEC_TITLES = Object.fromEntries(PAGES.flatMap(p => p.secs.map(s => [s.id, strip(md.parseInline(s.title))])));
 
 // 1) site
@@ -442,6 +468,7 @@ MODE = 'spa';
 const views = [`<div class="view" data-view="ana-sayfa" data-label="Bölümler">${homeHtml()}</div>`]
   .concat(PAGES.map(p => `<div class="view" data-view="${p.id}" data-label="Bölüm ${pad(p.num)}" hidden>${chapterHtml(p)}</div>`))
   .concat([`<div class="view" data-view="kuyruk" data-label="Okuma kuyruğu" hidden>${queueHtml()}</div>`])
+  .concat([`<div class="view" data-view="tekrar" data-label="Tekrar" hidden><div class="home tekrar-page" data-tk></div></div>`])
   .concat([`<div class="view" data-view="notlar" data-label="Notlar" hidden><div class="home notlar-page"><header class="nv-head" data-nv-head></header><div data-nv-bolum></div><div data-nv-form></div><div class="nv-filtre" data-nv-filtre></div><p class="nv-msg" data-nv-msg role="status"></p><div class="nv-liste" data-nv-liste></div></div></div>`]);
 const single = `<title>${esc(CFG.sahip)} · ${esc(CFG.ad)}</title>
 ${THEME_BOOT}${FONTS}
@@ -449,12 +476,13 @@ ${THEME_BOOT}${FONTS}
 <div id="top"></div>${header('', 'Bölümler')}
 <main id="icerik">${views.join('\n')}</main>${SEARCH_UI}
 <script type="application/json" id="defter-meta">${JSON.stringify({ ...META, mode: 'spa' })}</script>
+<script type="application/json" id="kart-data">${JSON.stringify(KARTS).replace(/</g, '\\u003c')}</script>
 <script type="application/json" id="search-data">${JSON.stringify(searchIndex()).replace(/</g, '\\u003c')}</script>
 <script type="application/json" id="queue-data">${JSON.stringify({ ...QUEUE, titles: SEC_TITLES, cats: Object.fromEntries(CATS.map(c => [c.id, c.name])), links: Object.fromEntries(Object.keys(SEC_TITLES).map(k => [k, '#' + k])) }).replace(/</g, '\\u003c')}</script>
 <script>${ENH}\n${APP}\n${READER}</script>`;
 fs.writeFileSync(path.join(OUT, 'defter.html'), single);
 
 const kb = n => (n / 1024).toFixed(0) + ' KB';
-console.log(`✓ ${PAGES.length} bölüm, ${Object.keys(SEC_PAGE).length} konu`);
+console.log(`✓ ${PAGES.length} bölüm, ${Object.keys(SEC_PAGE).length} konu, ${KARTS.length} tekrar kartı`);
 console.log(`  site  → dist/ (${PAGES.length + 2} sayfa)`);
 console.log(`  tek   → dist/defter.html (${kb(single.length)})`);

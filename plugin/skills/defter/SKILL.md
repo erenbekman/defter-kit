@@ -130,7 +130,7 @@ Build, commit ve yayın yok; birkaç saniyelik bir iş.
 2. **Mevcut bir konunun genişletmesi:** o konuya ekle. Biçim: `:::okuma` bloğu, `###` alt başlık, tablo satırı, `:::tuzak` ya da `:::duzeltme`.
 3. **Sayfaya ait ama hiçbir konuya sığmıyor:** o sayfada yeni konu aç, en yakın komşusunun yanına.
 4. **Hiçbir sayfaya sığmıyor:** uygun kategoride yeni sayfa aç. Frontmatter: `id, title, short, category, order, lede`.
-5. **Hiçbir kategoriye sığmıyor:** `data/categories.json`'a kategori ekle ve klasörünü aç.
+5. **Hiçbir kategoriye sığmıyor:** `data/categories.json`'a kategori ekle (`raf` alanıyla; raflar `defter.config.json` → `raflar`) ve klasörünü aç. Yeni bir alan (felsefe, film, dil gibi) yeni bir raf da ister.
 
 **Varsayılan kurallar.** Kullanıcının `CLAUDE.md`'si başka bir şey demiyorsa:
 - **Sadece yeni bilgi.** Malzemenin tamamı zaten varsa ekleme yapma, arşive atlandı (`a`) ve gerekçe yaz.
@@ -143,6 +143,7 @@ Build, commit ve yayın yok; birkaç saniyelik bir iş.
   gövde, kod, :::tuzak
   :::ozet    (tek cümle)
   :::quiz    (soru --- cevap)
+  :::kartlar (ezberlenecekler: "- ön :: arka" satırları; tekrara girer)
   ```
 - **Kaynak:** okumadan gelen ek `Kaynak: [Başlık — Yazar](link)` satırıyla biter. Kaynak bir sohbetse `Kaynak: Claude sohbeti (tarih)`.
 - **Kaynaktaki yanlış** sessizce düzeltilmez, `:::duzeltme` ile işaretlenir.
@@ -175,7 +176,7 @@ npm run build && npm run check
 1. Kısa, Türkçe bir mesajla commit at ve push et.
 2. `dist/defter.html` dosyasını `defter.config.json`'daki `artifact` adresine **aynı URL ile** yeniden yayınla.
    - Adres yoksa yeni artifact olarak yayınla.
-   - Yetenekler: `db`, `user` ve `sample`. `db` kuralları: `notlar`, `kayitlar` ve `kategoriler` için `read: admin, write: admin` (notlar kişiseldir); `kuyruk` varsayılanda kalır. Ayrıntısı `artifact-capabilities` skill'inde.
+   - Yetenekler: `db`, `user` ve `sample`. `db` kuralları: `notlar`, `kayitlar`, `kategoriler` ve `tekrar` için `read: admin, write: admin` (notlar kişiseldir); `kuyruk` varsayılanda kalır. Ayrıntısı `artifact-capabilities` skill'inde.
    - Bir kez yetenekle yayınladıktan sonra sonraki yayınlarda yetenekleri yeniden geçme; saklanan bildirim korunur.
    - Adresi config'e yaz.
 3. Artifact aracı yoksa sadece depoyu güncelle ve bunu söyle.
@@ -200,6 +201,7 @@ Kullanıcıya tek cümleyle nereye bırakıldığını ve ne zaman işleneceğin
 ## Diğer istekler
 
 - **"Defterde X ne diyor?":** haritadan ilgili konuları bul ve oku; konu bağlantısıyla cevap ver. Ekleme yapma.
+- **"Tekrarım nasıl gidiyor", "neleri unutuyorum":** `tekrar` koleksiyonunu oku; `yanlis` sayısı yüksek ve `kutu`'su düşük kartların konularını göster, o konuları tekrar okumayı öner.
 - **"Düzelt", "güncelle":** konuyu düzelt; eski bilgi yanlışsa `:::duzeltme` ile işaretle; sonra adım 7–8.
 - **"Taşı":** konuyu yeni yerine taşı; `#id` aynı kalsın; `npm run check` kırık bağlantı bırakmamalı.
 - **"Kuyruğu işle":**

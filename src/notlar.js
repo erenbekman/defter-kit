@@ -19,7 +19,8 @@
   const imza = `${META.ad || 'Defter'} · ${yil}`;
 
   // ------------------------------------------------------------ kategoriler: defterdekiler + notla açılanlar
-  const repoKat = (META.cats || []).map(c => ({ id: c.id, ad: c.name || c.id, aciklama: c.desc || '', kelime: c.words || 0, sayfa: (c.pages || []).length, repo: true }));
+  const repoKat = (META.cats || []).map(c => ({ id: c.id, ad: c.name || c.id, aciklama: c.desc || '', kelime: c.words || 0, sayfa: (c.pages || []).length, raf: c.raf || '', repo: true }));
+  const RAFLAR = META.raflar || [];
   function katlar() {
     const ids = new Set(repoKat.map(k => k.id));
     return repoKat.concat(S.kats.filter(k => !ids.has(k.id)).sort((a, b) => (a.sira || 0) - (b.sira || 0) || String(a.ad).localeCompare(b.ad, 'tr')));
@@ -83,17 +84,24 @@
     const notKelime = id => notlar.filter(n => (n.kategori || '') === id).reduce((a, n) => a + sayKelime(n.metin) + sayKelime(n.baslik), 0);
     const items = [];
     const gelen = sayi('');
-    if (S.hazir && gelen) items.push({ id: '', ad: 'Gelen kutusu', alt: `${gelen} not`, kelime: notKelime(''), seed: 'gelen-kutusu' });
+    if (S.hazir && gelen) items.push({ id: '', ad: 'Gelen kutusu', alt: `${gelen} not`, kelime: notKelime(''), seed: 'gelen-kutusu', raf: '' });
     katlar().forEach(k => {
       const n = sayi(k.id), parca = [];
       if (k.sayfa) parca.push(`${k.sayfa} bölüm`);
       if (n) parca.push(`${n} not`);
       if (!k.repo && !n && !S.hazir) return;
-      items.push({ id: k.id, ad: k.ad, alt: parca.join(' · ') || 'boş', kelime: (k.kelime || 0) + notKelime(k.id), seed: k.id, sira: sira(k.id) });
+      items.push({ id: k.id, ad: k.ad, alt: parca.join(' · ') || 'boş', kelime: (k.kelime || 0) + notKelime(k.id), seed: k.id, sira: sira(k.id), raf: k.raf || (RAFLAR[0] && RAFLAR[0].id) || '' });
     });
-    grid.innerHTML = items.map(it => {
+    const kapakA = it => {
       const hedef = SPA ? '#notlar' : `#kisim-${it.id}`;   // tek dosyada kategori sayfası, sitede ana sayfadaki bölüm
       return `<a class="raf-k" href="${hedef}" data-kat="${esc(it.id)}" title="${esc(it.ad)}">${K.kapak({ id: it.seed, ad: it.ad, alt: it.alt, kelime: it.kelime, imza, sira: it.sira })}</a>`;
+    };
+    // raflar: defter.config.json'daki "raflar" sırasıyla; tanımsızsa tek raf
+    const gruplar = RAFLAR.length > 1 ? [{ id: '', ad: '' }].concat(RAFLAR) : [{ id: null, ad: '' }];
+    grid.innerHTML = gruplar.map(g => {
+      const its = g.id === null ? items : items.filter(it => (it.raf || '') === g.id || (g.id === RAFLAR[0].id && it.raf && !RAFLAR.some(r => r.id === it.raf)));
+      if (!its.length) return '';
+      return `<div class="raf-grup">${g.ad ? `<h3 class="raf-alt">${esc(g.ad)}<span>${its.length} kategori</span></h3>` : ''}<div class="raf-sira">${its.map(kapakA).join('')}</div></div>`;
     }).join('');
     const say = $('[data-raf-say]', raf);
     if (say) say.textContent = S.hazir ? `${notlar.length} not · ${katlar().length} kategori` : `${repoKat.length} kategori`;
