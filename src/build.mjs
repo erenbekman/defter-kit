@@ -350,7 +350,7 @@ ${cards ? `<div class="cards">${cards}</div>` : ''}${soon}
   <div class="raf-form" data-raf-form hidden></div>
   <div class="raf-grid" data-raf-grid></div>
 </section>
-${parts}
+${MODE === 'spa' ? `<div class="kisimlar" hidden>${parts}</div>` : parts}
 <a class="queue-card" href="${href('kuyruk')}"><b>Okuma kuyruğu</b><span>${qDone} / ${QUEUE.items.length} işlendi →</span><span class="q-mini">Kaydedilen yazılar sırayla okunuyor; sadece defterde olmayan bilgi, kaynağıyla birlikte ilgili bölüme ekleniyor.</span></a>
 <footer class="home-foot"><span>${esc(CFG.ad)} · ${esc(CFG.sahip)} · ${new Date().getFullYear()}</span><em>${esc(CFG.slogan)}</em></footer>
 </div>`;

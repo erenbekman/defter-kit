@@ -92,7 +92,7 @@
       items.push({ id: k.id, ad: k.ad, alt: parca.join(' · ') || 'boş', kelime: (k.kelime || 0) + notKelime(k.id), seed: k.id, sira: sira(k.id) });
     });
     grid.innerHTML = items.map(it => {
-      const hedef = S.hazir ? `#notlar` : (SPA ? `#kisim-${it.id}` : `#kisim-${it.id}`);
+      const hedef = SPA ? '#notlar' : `#kisim-${it.id}`;   // tek dosyada kategori sayfası, sitede ana sayfadaki bölüm
       return `<a class="raf-k" href="${hedef}" data-kat="${esc(it.id)}" title="${esc(it.ad)}">${K.kapak({ id: it.seed, ad: it.ad, alt: it.alt, kelime: it.kelime, imza, sira: it.sira })}</a>`;
     }).join('');
     const say = $('[data-raf-say]', raf);
@@ -100,7 +100,7 @@
   }
   document.addEventListener('click', e => {      // kapağa tıklayınca filtreyi ayarla, sonra app.js #notlar'a geçer
     const a = e.target.closest('.raf-k[data-kat]');
-    if (!a || !S.hazir) return;
+    if (!a || !SPA) return;
     S.f.kat = a.dataset.kat === '' ? 'gelen' : a.dataset.kat; S.f.tur = 'hepsi'; S.f.q = ''; S.edit = null;
     listeCiz();
   }, true);
@@ -185,7 +185,7 @@ ${S.yaz ? `<span class="kn-act">${!n.kategori && S.sample && n.durum !== 'arsiv'
     const pmap = Object.fromEntries((META.pages || []).map(p => [p.id, p]));
     const kelime = (k ? k.kelime || 0 : 0) + S.list.filter(n => f.kat === 'hepsi' || (f.kat === 'gelen' ? !n.kategori : n.kategori === f.kat)).reduce((a, n) => a + sayKelime(n.metin), 0);
     box.innerHTML = `<div class="nv-kapak">${K.kapak({ id: f.kat === 'gelen' ? 'gelen-kutusu' : f.kat === 'hepsi' ? 'butun-notlar' : f.kat, ad, kelime, imza, sira: sira(f.kat) })}</div>
-<div class="nv-bilgi"><p class="eyebrow"><b>${sayfalar.length ? 'Kategori' : 'Notlar'}</b>${f.kat !== 'hepsi' ? ' · <a href="#notlar" data-git="hepsi">bütün notlar</a>' : ''}</p><h1>${esc(ad)}</h1><p class="lede">${esc(aciklama)}</p></div>`;
+<div class="nv-bilgi"><p class="eyebrow"><b>${sayfalar.length ? 'Kategori' : 'Notlar'}</b>${f.kat !== 'hepsi' && S.hazir ? ' · <a href="#notlar" data-git="hepsi">bütün notlar</a>' : ''}</p><h1>${esc(ad)}</h1><p class="lede">${esc(aciklama)}</p></div>`;
     // kategorinin bölümleri: konular bunlarda; notlar altta ayrı bir katman
     const bb = $('[data-nv-bolum]', nv);
     if (bb) {
@@ -193,7 +193,8 @@ ${S.yaz ? `<span class="kn-act">${!n.kategori && S.sample && n.durum !== 'arsiv'
       const kartlar = sayfalar.map(id => { const c = document.querySelector('.view[data-view="ana-sayfa"] .card[data-card="' + id + '"]'); return c ? c.outerHTML : ''; }).join('');
       const notSay = S.list.filter(n => n.durum !== 'arsiv' && n.kategori === f.kat).length;
       bb.innerHTML = sayfalar.length ? `<section class="nv-sec"><h2>Bölümler <span>${sayfalar.length} bölüm · ${konu} konu</span></h2><div class="cards">${kartlar}</div></section>
-<h2 class="nv-h2">Notlar <span>${notSay ? notSay + ' not' : 'henüz yok'}</span></h2>` : '';
+${S.hazir ? `<h2 class="nv-h2">Notlar <span>${notSay ? notSay + ' not' : 'henüz yok'}</span></h2>` : ''}` : '';
+      const jl = document.querySelector('[data-jump-label]'); if (jl && !nv.hidden) jl.textContent = ad;
     }
   }
   const sayfaSay = () => { const c = (META.cats || []).find(c => c.id === S.f.kat); return c ? (c.pages || []).length : 0; };
@@ -209,7 +210,12 @@ ${S.yaz ? `<span class="kn-act">${!n.kategori && S.sample && n.durum !== 'arsiv'
   }
   function listeCiz(sadeceListe) {
     if (!nv) return;
-    if (!S.hazir) { const l = $('[data-nv-liste]', nv); if (l) l.innerHTML = `<p class="nv-bos">Notlar, defter Claude'da açıldığında görünür.</p>`; return; }
+    if (!S.hazir) {     // veritabanı yok: sadece kategori başlığı ve bölümler
+      baslikCiz();
+      ['[data-nv-filtre]', '[data-nv-form]'].forEach(q => { const el = $(q, nv); if (el) { el.innerHTML = ''; delete el.dataset.anahtar; } });
+      const l = $('[data-nv-liste]', nv); if (l) l.innerHTML = sayfaSay() ? '' : `<p class="nv-bos">Notlar, defter Claude'da açıldığında görünür.</p>`;
+      return;
+    }
     if (!sadeceListe) {
       baslikCiz(); filtreCiz();
       const fk = $('[data-nv-form]', nv), anahtar = S.yaz && !S.f.arsiv ? S.f.kat + '|' + katlar().length : '';
