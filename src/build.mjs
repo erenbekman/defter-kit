@@ -68,7 +68,8 @@ for (const p of PAGES) {
   }
   p.intro = intro.join('\n');
   p.secs = secs;
-  p.mins = Math.max(5, Math.round(p.body.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length / 200 / 5) * 5);
+  p.words = p.body.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
+  p.mins = Math.max(5, Math.round(p.words / 200 / 5) * 5);
 }
 const SEC_PAGE = {};
 for (const p of PAGES) for (const s of p.secs) SEC_PAGE[s.id] = p.id;
@@ -245,7 +246,7 @@ function header(current, label) {
 <header class="site-head">
   <a class="brand" href="${href('')}"><span class="mark">${esc(CFG.ad.charAt(0).toLocaleLowerCase(CFG.dil))}</span><span class="txt">${esc(CFG.ad)}</span><span class="by">${esc(CFG.sahip)}</span></a>
   <span class="crumb-sep">/</span>
-  <details class="jump"><summary data-jump-label>${esc(label)}</summary><nav class="jump-menu" aria-label="Bölümler">${jumpMenu(current)}<p>${esc(CFG.ad)}</p><a href="${href('kuyruk')}">Okuma kuyruğu</a></nav></details>
+  <details class="jump"><summary data-jump-label>${esc(label)}</summary><nav class="jump-menu" aria-label="Bölümler">${jumpMenu(current)}<p>${esc(CFG.ad)}</p>${MODE === 'spa' ? '<a href="#notlar" data-nots-link hidden>Notlar</a>' : ''}<a href="${href('kuyruk')}">Okuma kuyruğu</a></nav></details>
   <div class="head-actions">
     <button class="search-btn" type="button" data-search-open><span class="sb-lbl">Ara</span><kbd>/</kbd><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
     <div class="ayar-wrap"><button class="icon-btn aa-btn" type="button" data-ayar-open aria-haspopup="dialog" aria-expanded="false" aria-label="Okuma ayarları" title="Okuma ayarları">Aa</button></div>
@@ -344,6 +345,11 @@ ${cards ? `<div class="cards">${cards}</div>` : ''}${soon}
     <div><dt>Öğrendiğin</dt><dd data-total-prog>0<small> / ${totalSecs}</small></dd></div>
   </dl>
 </section>
+<section class="raf" data-raf aria-labelledby="raf-h">
+  <div class="raf-head"><h2 id="raf-h">Raf</h2><span class="raf-say" data-raf-say></span>${MODE === 'spa' ? `<a class="raf-tumu" href="#notlar" data-nots-link hidden>Bütün notlar →</a>` : ''}</div>
+  <div class="raf-form" data-raf-form hidden></div>
+  <div class="raf-grid" data-raf-grid></div>
+</section>
 ${parts}
 <a class="queue-card" href="${href('kuyruk')}"><b>Okuma kuyruğu</b><span>${qDone} / ${QUEUE.items.length} işlendi →</span><span class="q-mini">Kaydedilen yazılar sırayla okunuyor; sadece defterde olmayan bilgi, kaynağıyla birlikte ilgili bölüme ekleniyor.</span></a>
 <footer class="home-foot"><span>${esc(CFG.ad)} · ${esc(CFG.sahip)} · ${new Date().getFullYear()}</span><em>${esc(CFG.slogan)}</em></footer>
@@ -400,9 +406,9 @@ fs.rmSync(OUT, { recursive: true, force: true });
 fs.mkdirSync(path.join(OUT, 'assets'), { recursive: true });
 const CSS = read('src/style.css');
 const APP = read('src/app.js');
-const READER = read('src/ayarlar.js') + '\n' + read('src/reader.js');
+const READER = ['ayarlar', 'kapak', 'notlar', 'reader'].map(f => read(`src/${f}.js`)).join('\n');
 const ENH = read('src/enhance.js').replace('export function enhance', 'function enhance');
-const META = { ad: CFG.ad, sahip: CFG.sahip, pages: PAGES.map(p => ({ id: p.id, n: p.num, short: p.short, cat: p.category, secs: p.secs.map(s => s.id) })), cats: CATS.map(c => ({ id: c.id, pages: c.pages })) };
+const META = { ad: CFG.ad, sahip: CFG.sahip, pages: PAGES.map(p => ({ id: p.id, n: p.num, short: p.short, cat: p.category, secs: p.secs.map(s => s.id) })), cats: CATS.map(c => ({ id: c.id, name: c.name, desc: c.desc, words: c.pages.reduce((a, id) => a + PAGE[id].words, 0), pages: c.pages })) };
 const SEC_TITLES = Object.fromEntries(PAGES.flatMap(p => p.secs.map(s => [s.id, strip(md.parseInline(s.title))])));
 
 // 1) site
@@ -435,7 +441,8 @@ fs.writeFileSync(path.join(OUT, 'kuyruk/index.html'), shell(`Okuma kuyruğu · $
 MODE = 'spa';
 const views = [`<div class="view" data-view="ana-sayfa" data-label="Bölümler">${homeHtml()}</div>`]
   .concat(PAGES.map(p => `<div class="view" data-view="${p.id}" data-label="Bölüm ${pad(p.num)}" hidden>${chapterHtml(p)}</div>`))
-  .concat([`<div class="view" data-view="kuyruk" data-label="Okuma kuyruğu" hidden>${queueHtml()}</div>`]);
+  .concat([`<div class="view" data-view="kuyruk" data-label="Okuma kuyruğu" hidden>${queueHtml()}</div>`])
+  .concat([`<div class="view" data-view="notlar" data-label="Notlar" hidden><div class="home notlar-page"><header class="nv-head" data-nv-head></header><div data-nv-form></div><div class="nv-filtre" data-nv-filtre></div><p class="nv-msg" data-nv-msg role="status"></p><div class="nv-liste" data-nv-liste></div></div></div>`]);
 const single = `<title>${esc(CFG.sahip)} · ${esc(CFG.ad)}</title>
 ${THEME_BOOT}${FONTS}
 <style>${CSS}</style>

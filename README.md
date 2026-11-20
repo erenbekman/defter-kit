@@ -10,7 +10,7 @@ Kendi öğrenme defterini kur. Okuduğun yazıyı, izlediğin videoyu ya da Clau
 
 | Parça | Ne yapar |
 |---|---|
-| **Motor** (`src/`) | Markdown'ı çok sayfalı bir siteye ve tek dosyalık bir Claude artifact'ına derler: arama, "öğrendim" işaretleri, açık/koyu tema, okuma kuyruğu. Tek bağımlılık: `marked`. |
+| **Motor** (`src/`) | Markdown'ı çok sayfalı bir siteye ve tek dosyalık bir Claude artifact'ına derler: arama, "öğrendim" işaretleri, okuma ayarları, kenar notları, sayfa içi sohbet, okuma kuyruğu ve hızlı notlar. Ana sayfadaki rafta her kategori kendi üretilmiş kapağıyla durur. Tek bağımlılık: `marked`. |
 | **`defter` eklentisi** (`plugin/`) | Herkes için aynı skill. Defterini kendisi bulur; herhangi bir Claude sohbetinden ekler, ilgili konuyu bulur, yoksa konu, sayfa ya da kategori açar. Kişisel adres içermez. |
 | **Kurulum** (`scripts/yeni-defter.mjs`) | Adın, konun ve kategorilerinle boş bir defter kurar. |
 | **Kural dosyası** (`CLAUDE.md`) | Defterin üslubu ve blok sözlüğü. Senin defterin, senin kuralların: değiştirebilirsin. |
@@ -58,7 +58,9 @@ Eklentiyi kurduktan sonra skill bu defteri `<github-adın>/defter` adından ya d
 
 | Ne dersin | Ne olur |
 |---|---|
+| "not al: …", "yapılacaklara ekle: …" + kısa fikir ya da link | Saniyeler içinde hızlı not olur, doğru kategoriye konur (yoksa açılır); build ve yayın yok |
 | "deftere ekle" + link, metin, görsel | Doğrulanır, defterde olmayan kısım ilgili konuya eklenir |
+| "bu notu konuya çevir" | Olgunlaşan not doğrulanıp konu olarak deftere işlenir |
 | "direkt ekle" | Araştırma yapılmaz; verdiğin bilgi defter biçimine sokulur |
 | "daha detaylı ekle" | Birincil kaynaklardan araştırılır, kod örnekleri çalıştırılır |
 | "şu konunun altına ekle", "yeni bölüm aç: Redis" | Yeri sen seçersin |

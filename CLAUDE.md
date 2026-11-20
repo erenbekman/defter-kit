@@ -47,6 +47,7 @@ Bölüm numaraları kategori sırası + `order` alanından otomatik çıkar. Yen
 | `direkt` | "olduğu gibi ekle", "direkt yaz" | Verilen bilgi defter biçimine sokulur; araştırma yapılmaz. Gizli bilgi ve bariz hata kuralları yine geçerli. |
 | `standart` | varsayılan | Verilen bilgi doğrulanır, defterde olanla karşılaştırılır, sadece yeni olan eklenir. |
 | `detayli` | "daha detaylı", "araştır", "derinleştir" | Birincil kaynaklardan araştırılır; kod çalıştırılır, birden çok konu açılabilir. |
+| `not` | "not al", "hızlı not", kısa fikir, link, yapılacak | Artifact veritabanına (`kayitlar`) saniyeler içinde yazılır; build ve yayın yok. Doğru kategoriye konur, yoksa `kategoriler`'e yeni kategori açılır. Olgunlaşan not sonra "konuya çevir" ile `standart` yoldan işlenir. |
 
 ## Markdown sözlüğü
 
@@ -87,6 +88,21 @@ Soru metni?
 - Kod bloğu başlığı: ` ```js title="dosya.js: ne gösteriyor" `
 - İç bağlantı: `[metin](#konu-id)` ya da `[metin](#sayfa-id)`.
 - Ham HTML serbest, ama boş satır içermesin.
+
+## Hızlı notlar
+
+Defterin iki katmanı var:
+
+- **Konular** (`content/`): doğrulanmış, kaynaklı, benzetmeli ve quiz'li öğrenme notları. Depoda durur; build ve yayın ister.
+- **Notlar** (artifact veritabanı): hızlı fikirler, linkler, yapılacaklar. Sayfadaki kutudan ya da `defter` skill'iyle anında eklenir, raftaki kategoriye bağlanır.
+
+Veritabanı:
+
+- `kayitlar/<id>`: `{metin, baslik, tur: not|link|yapilacak|alinti, url, kategori, etiketler[], durum: acik|konuya|arsiv, konu, sabit, bitti, kaynak: sayfa|sohbet, eklenme, guncelleme}`. Id `k-<zaman36><4 rastgele>`. `kategori` boşsa not gelen kutusundadır; `konu` konuya çevrildiyse konu id'sidir.
+- `kategoriler/<slug>`: depoda olmayan, notla açılan kategoriler; `{ad, aciklama, sira, eklenme}`. Depodaki kategoriyle aynı id'yi alan kayıt yok sayılır.
+- Okuma ve yazma sadece sahibe ve editörlere açıktır (`read: admin, write: admin`). Sınır: artifact başına 25.000 belge, belge başına 256 KiB.
+
+Notlar da gizli bilgi kuralına (kural 7) tabidir.
 
 ## Okuma kuyruğu
 
