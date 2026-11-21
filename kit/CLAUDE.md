@@ -82,6 +82,7 @@ Soru metni?
 | `:::kavramlar` | Kavram kartları: her kart `#### Ad \| alt başlık`, içinde `> benzetme` ve gövde |
 | `:::kurallar` | Numaralı kural listesi (içinde `1. ...`) |
 | `:::kartlar Başlık` | Tekrar kartları: her satır `- ön yüz :: arka yüz`; konu "Öğrendim" deyince günlük tekrara girer |
+| `:::filmografi Ad` | `- 1999 Film adı — not` satırları; Letterboxd verisiyle (`data/letterboxd/`) izlendi, puan, listede durumu eklenir |
 | `:::kaynaklar Başlık` | Sayfa sonu kaynak listesi |
 
 - Kod bloğu başlığı: ` ```js title="dosya.js: ne gösteriyor" `
