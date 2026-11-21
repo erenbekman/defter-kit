@@ -249,6 +249,7 @@ function render(text) {
         return `<div class="kartlar">${b.arg ? `<p class="kartlar-h"><span class="tag">Kartlar</span>${md.parseInline(b.arg)}</p>` : ''}<dl>${rows}</dl></div>\n`;
       }
       case 'filmler': return filmlerHtml();
+      case 'filmografi': return filmografiHtml(b.arg, b.body);
       case 'kaynaklar': return `<div class="sources"><h2>${esc(b.arg || 'Kaynaklar')}</h2>${inner()}</div>\n`;
       default: throw new Error('Bilinmeyen direktif: ' + b.name);
     }
@@ -294,6 +295,30 @@ function filmlerHtml() {
 <p class="fl-bos" data-fl-bos hidden>Bu aramayla eşleşen film yok.</p>
 </div>
 `;
+}
+
+// :::filmografi Yönetmen — "- 1957 Paths of Glory — not" satırlarını Letterboxd verisiyle eşleştirir
+function filmografiHtml(ad, body) {
+  const nrm = s => String(s).toLocaleLowerCase('en').normalize('NFKD').replace(/[^a-z0-9]/g, '');
+  const izlenen = csvOku('watched.csv'), liste = csvOku('watchlist.csv');
+  const puan = Object.fromEntries(csvOku('ratings.csv').map(r => [r['Letterboxd URI'], Number(r.Rating)]));
+  const bul = (arr, yil, isim) => arr.find(f => Math.abs(Number(f.Year) - yil) <= 1 && (nrm(f.Name).startsWith(isim) || isim.startsWith(nrm(f.Name))));
+  const yildiz = n => '★'.repeat(Math.floor(n)) + (n % 1 ? '½' : '');
+  let say = 0, top = 0; const puanlar = [];
+  const satirlar = body.split('\n').filter(l => /^- \d{4} /.test(l)).map(l => {
+    const m = l.slice(2).match(/^(\d{4}) (.+?)(?: — (.+))?$/);
+    const yil = Number(m[1]), baslik = m[2], not = m[3] || '', isim = nrm(baslik);
+    top++;
+    const w = bul(izlenen, yil, isim), q = !w && bul(liste, yil, isim);
+    let durum, cls;
+    if (w) { say++; const p = puan[w['Letterboxd URI']]; if (p) puanlar.push(p); durum = p ? `<span class="flm-p" aria-label="${p} yıldız">${yildiz(p)}</span>` : 'izlendi'; cls = 'izlendi'; }
+    else if (q) { durum = 'listende'; cls = 'listede'; }
+    else { durum = 'izlenmedi'; cls = 'yok'; }
+    const url = (w || q || {})['Letterboxd URI'];
+    return `<li class="flm-${cls}"><span class="flm-y">${yil}</span><span class="flm-ad">${url ? `<a href="${esc(url)}" target="_blank" rel="noopener">${md.parseInline(baslik)}</a>` : md.parseInline(baslik)}${not ? `<small>${md.parseInline(not)}</small>` : ''}</span><span class="flm-d">${durum}</span></li>`;
+  });
+  const ort = puanlar.length ? ` · ortalama ${(puanlar.reduce((a, b) => a + b, 0) / puanlar.length).toFixed(1)} ★` : '';
+  return `<div class="flm"><p class="flm-h"><b>${esc(ad)}</b><span>${say}/${top} izlendi${ort}</span><i style="--p:${top ? Math.round(say / top * 100) : 0}%"></i></p><ol class="flm-list">${satirlar.join('')}</ol></div>\n`;
 }
 
 // ---------------------------------------------------------------- sayfa parçaları
