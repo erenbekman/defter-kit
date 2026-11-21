@@ -84,11 +84,13 @@ Soru metni?
 | `:::kavramlar` | Kavram kartları: her kart `#### Ad \| alt başlık`, içinde `> benzetme` ve gövde |
 | `:::kurallar` | Numaralı kural listesi (içinde `1. ...`) |
 | `:::kartlar Başlık` | Tekrar kartları: her satır `- ön yüz :: arka yüz`; konu "Öğrendim" deyince günlük tekrara girer |
-| `:::filmografi Ad` | `- 1999 Film adı — not` satırları; Letterboxd verisiyle (`data/letterboxd/`) izlendi, puan, listede durumu eklenir |
+| `:::filmografi Ad \| 7,4` | `- 1999 Film adı — not` satırları; her film üretilmiş bir kapakla rafa dizilir, Letterboxd verisiyle (`data/letterboxd/`) puan, izlendi, listede durumu eklenir. `\|` sonrası isteğe bağlı palet sıraları (`src/kapak.js`) |
+| `:::gorsel Altyazı` | İlk satır `media/<kategori>/<ad>.webp`, isteğe bağlı `Kaynak: …` satırı. Görseller `media/` altında WebP olarak (en çok ~1400 px) durur, artifact'a `files` ile yayınlanır |
 | `:::kaynaklar Başlık` | Sayfa sonu kaynak listesi |
 
 - Kod bloğu başlığı: ` ```js title="dosya.js: ne gösteriyor" `
 - İç bağlantı: `[metin](#konu-id)` ya da `[metin](#sayfa-id)`.
+- Görseller: kullanıcının verdiği resimler `media/` altına sıkıştırılarak konur; telifli afiş ve fotoğraf dışarıdan çekilip eklenmez.
 - Ham HTML serbest, ama boş satır içermesin.
 
 ## Tekrar

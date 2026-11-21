@@ -137,21 +137,26 @@ var defterKapak = (function () {
   ];
 
   const nf = new Intl.NumberFormat('tr-TR');
-  // kapak({id, ad, alt, kelime, imza, sira}) → HTML. kalınlık kelime sayısıyla büyür.
+  // kapak({id, ad, alt, kelime, imza, sira, palet?, sag?}) → HTML. palet: sabit palet sırası, sag: sağ alt yazı (yoksa kelime sayısı). kalınlık kelime sayısıyla büyür.
   function kapak(o) {
     const h = hash(o.id || o.ad), r = rng(h), i = o.sira;
     // rafta sırası bilinen kapaklar birbirinden farklı palet ve desen alır (5 ve 7, 16 ve 12 ile aralarında asal)
-    const p = PALET[i != null ? (i * 5 + 3) % PALET.length : h % PALET.length], desen = DESEN[i != null ? (i * 7 + 1) % DESEN.length : (h >>> 4) % DESEN.length];
+    const p = o.palet != null ? PALET[o.palet % PALET.length] : PALET[i != null ? (i * 5 + 3) % PALET.length : h % PALET.length], desen = DESEN[i != null ? (i * 7 + 1) % DESEN.length : (h >>> 4) % DESEN.length];
     const kat = Math.max(0, Math.min(8, Math.round(Math.log2(Math.max(1, (o.kelime || 0) / 400)))));
     const ad = String(o.ad || '').trim();
     const sp = ad.indexOf(' ');
-    const ust = sp > 0 && ad.length > 14 ? ad.slice(0, sp) : ad, alt1 = sp > 0 && ad.length > 14 ? ad.slice(sp + 1) : '';
+    let ust = sp > 0 && ad.length > 14 ? ad.slice(0, sp) : ad, alt1 = sp > 0 && ad.length > 14 ? ad.slice(sp + 1) : '';
+    if (o.film && ad.length > 14) {        // film adı: iki noktadan ya da ilk 8+ harflik kelime öbeğinden böl
+      const ik = ad.indexOf(': ');
+      if (ik > 0) { ust = ad.slice(0, ik + 1); alt1 = ad.slice(ik + 2); }
+      else { const k = ad.split(' '); let n = 0, u = ''; while (n < k.length && u.length < 8) u += (n ? ' ' : '') + k[n++]; ust = u; alt1 = k.slice(n).join(' '); }
+    }
     const yerAlt = (h >>> 8) % 3 === 0;    // başlık bazen altta
     const baslik = `<div class="kp-t"><b>${esc(ust)}</b>${alt1 ? `<i>${esc(alt1)}</i>` : ''}${o.alt ? `<small>${esc(o.alt)}</small>` : ''}</div>`;
     const resim = `<svg class="kp-i" viewBox="0 0 100 100" aria-hidden="true" preserveAspectRatio="xMidYMid meet">${desen(r, p)}</svg>`;
     return `<span class="kapak${yerAlt ? ' alt' : ''}" style="--kp-bg:${p[0]};--kp-ink:${p[1]};--kp-ac:${p[2]};--kp-kat:${kat}">` +
       `<span class="kp-yuz">${yerAlt ? resim + '<span class="kp-cizgi"></span>' + baslik : baslik + resim}` +
-      `<span class="kp-f"><span>${esc(o.imza || '')}</span><span>${nf.format(o.kelime || 0)} kelime</span></span></span></span>`;
+      `<span class="kp-f"><span>${esc(o.imza || '')}</span><span>${o.sag != null ? esc(o.sag) : nf.format(o.kelime || 0) + ' kelime'}</span></span></span></span>`;
   }
   return { kapak, hash };
 })();

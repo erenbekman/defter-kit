@@ -250,6 +250,14 @@ function render(text) {
       }
       case 'filmler': return filmlerHtml();
       case 'filmografi': return filmografiHtml(b.arg, b.body);
+      case 'gorsel': {
+        // gövde: ilk satır media/ altındaki yol, varsa "Kaynak: …" satırı; başlık altyazı olur
+        const ls = b.body.split('\n').map(l => l.trim()).filter(Boolean);
+        const yol = ls.find(l => !/^Kaynak:/i.test(l)) || '', kaynak = (ls.find(l => /^Kaynak:/i.test(l)) || '').replace(/^Kaynak:\s*/i, '');
+        if (!fs.existsSync(path.join(ROOT, yol))) throw new Error('Görsel yok: ' + yol);
+        const src = (MODE === 'spa' ? '' : '/') + yol;
+        return `<figure class="gorsel"><a href="${esc(src)}" target="_blank" rel="noopener"><img src="${esc(src)}" alt="${esc(b.arg || '')}" loading="lazy" decoding="async"></a>${b.arg || kaynak ? `<figcaption>${b.arg ? md.parseInline(b.arg) : ''}${kaynak ? `<small>${md.parseInline(kaynak)}</small>` : ''}</figcaption>` : ''}</figure>\n`;
+      }
       case 'kaynaklar': return `<div class="sources"><h2>${esc(b.arg || 'Kaynaklar')}</h2>${inner()}</div>\n`;
       default: throw new Error('Bilinmeyen direktif: ' + b.name);
     }
@@ -297,28 +305,34 @@ function filmlerHtml() {
 `;
 }
 
-// :::filmografi Yönetmen — "- 1957 Paths of Glory — not" satırlarını Letterboxd verisiyle eşleştirir
-function filmografiHtml(ad, body) {
+// :::filmografi Ad | 7,4,3 — "- 1957 Paths of Glory — not" satırları. Letterboxd verisiyle eşleşir, her film üretilmiş bir kapakla rafa dizilir.
+// "|" sonrası isteğe bağlı palet sıraları (src/kapak.js PALET); verilmezse raf sırasına göre değişir.
+const KAPAK = new Function(read('src/kapak.js') + '\nreturn defterKapak;')();
+function filmografiHtml(arg, body) {
+  const [ad, paletStr] = String(arg || '').split('|').map(x => x.trim());
+  const paletler = (paletStr || '').split(',').map(Number).filter(n => Number.isInteger(n));
   const nrm = s => String(s).toLocaleLowerCase('en').normalize('NFKD').replace(/[^a-z0-9]/g, '');
   const izlenen = csvOku('watched.csv'), liste = csvOku('watchlist.csv');
   const puan = Object.fromEntries(csvOku('ratings.csv').map(r => [r['Letterboxd URI'], Number(r.Rating)]));
   const bul = (arr, yil, isim) => arr.find(f => Math.abs(Number(f.Year) - yil) <= 1 && (nrm(f.Name).startsWith(isim) || isim.startsWith(nrm(f.Name))));
   const yildiz = n => '★'.repeat(Math.floor(n)) + (n % 1 ? '½' : '');
   let say = 0, top = 0; const puanlar = [];
-  const satirlar = body.split('\n').filter(l => /^- \d{4} /.test(l)).map(l => {
+  const ogeler = body.split('\n').filter(l => /^- \d{4} /.test(l)).map((l, i) => {
     const m = l.slice(2).match(/^(\d{4}) (.+?)(?: — (.+))?$/);
     const yil = Number(m[1]), baslik = m[2], not = m[3] || '', isim = nrm(baslik);
     top++;
     const w = bul(izlenen, yil, isim), q = !w && bul(liste, yil, isim);
-    let durum, cls;
-    if (w) { say++; const p = puan[w['Letterboxd URI']]; if (p) puanlar.push(p); durum = p ? `<span class="flm-p" aria-label="${p} yıldız">${yildiz(p)}</span>` : 'izlendi'; cls = 'izlendi'; }
+    let durum, cls, p = 0;
+    if (w) { say++; p = puan[w['Letterboxd URI']] || 0; if (p) puanlar.push(p); durum = p ? `<span class="flm-p" aria-label="${p} yıldız">${yildiz(p)}</span>` : 'izlendi'; cls = 'izlendi'; }
     else if (q) { durum = 'listende'; cls = 'listede'; }
     else { durum = 'izlenmedi'; cls = 'yok'; }
     const url = (w || q || {})['Letterboxd URI'];
-    return `<li class="flm-${cls}"><span class="flm-y">${yil}</span><span class="flm-ad">${url ? `<a href="${esc(url)}" target="_blank" rel="noopener">${md.parseInline(baslik)}</a>` : md.parseInline(baslik)}${not ? `<small>${md.parseInline(not)}</small>` : ''}</span><span class="flm-d">${durum}</span></li>`;
+    const kp = KAPAK.kapak({ id: 'film:' + baslik + yil, ad: strip(md.parseInline(baslik)), alt: String(yil), imza: ad, sag: p ? yildiz(p) : cls === 'listede' ? 'listede' : '', film: true, sira: i, palet: paletler.length ? paletler[i % paletler.length] : null });
+    const ic = `${kp}<span class="flm-alt"><span class="flm-y">${yil}</span><span class="flm-d">${durum}</span></span>${not ? `<span class="flm-not">${md.parseInline(not)}</span>` : ''}`;
+    return `<li class="flm-${cls}">${url ? `<a href="${esc(url)}" target="_blank" rel="noopener" aria-label="${esc(strip(md.parseInline(baslik)))} (${yil}) Letterboxd'da">${ic}</a>` : ic}</li>`;
   });
   const ort = puanlar.length ? ` · ortalama ${(puanlar.reduce((a, b) => a + b, 0) / puanlar.length).toFixed(1)} ★` : '';
-  return `<div class="flm"><p class="flm-h"><b>${esc(ad)}</b><span>${say}/${top} izlendi${ort}</span><i style="--p:${top ? Math.round(say / top * 100) : 0}%"></i></p><ol class="flm-list">${satirlar.join('')}</ol></div>\n`;
+  return `<div class="flm"><p class="flm-h"><b>${esc(ad)}</b><span>${say}/${top} izlendi${ort}</span><i style="--p:${top ? Math.round(say / top * 100) : 0}%"></i></p><ol class="flm-raf">${ogeler.join('')}</ol></div>\n`;
 }
 
 // ---------------------------------------------------------------- sayfa parçaları
@@ -494,6 +508,7 @@ const SEARCH_UI = `<div class="search" data-search hidden><div class="search-box
 // ---------------------------------------------------------------- yazdır
 fs.rmSync(OUT, { recursive: true, force: true });
 fs.mkdirSync(path.join(OUT, 'assets'), { recursive: true });
+if (fs.existsSync(path.join(ROOT, 'media'))) fs.cpSync(path.join(ROOT, 'media'), path.join(OUT, 'media'), { recursive: true });
 const CSS = read('src/style.css');
 const APP = read('src/app.js');
 const READER = ['ayarlar', 'kapak', 'notlar', 'tekrar', 'reader'].map(f => read(`src/${f}.js`)).join('\n');
